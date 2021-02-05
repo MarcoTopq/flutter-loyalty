@@ -47,7 +47,6 @@ dependencies:
   rounded_loading_button: ^1.0.0
   toast: ^0.1.5
   curved_navigation_bar: ^0.3.3
-  firebase_messaging: ^7.0.0
   mime: ^0.9.6+3
   http_parser: ^3.1.4
   file_picker: ^1.6.3+2

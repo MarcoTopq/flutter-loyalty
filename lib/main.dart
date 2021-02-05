@@ -68,13 +68,20 @@ var gold = Color.fromRGBO(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-  _firebaseMessaging.requestNotificationPermissions();
-  Stream<String> fcmStream = _firebaseMessaging.onTokenRefresh;
-  fcmStream.listen((token) {
+  final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
+  firebaseMessaging.requestNotificationPermissions();
+  Stream<String> fcmStream = firebaseMessaging.onTokenRefresh;
+  fcmStream.listen((tokens) {
     // saveToken(token);
-    print("fcm token is: $token");
-    fcm = token;
+    print("fcm token is: $tokens");
+    fcm = tokens;
+  });
+  firebaseMessaging.getToken().then((String tokens) {
+    assert(token != null);
+    // setState(() {
+    //   fcm = token;
+    // });
+    print("fcm : $tokens");
   });
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     // systemNavigationBarColor: Colors.grey[700], // navigation bar color
@@ -107,6 +114,20 @@ class _MyAppState extends State<MyApp> {
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   @override
   void initState() {
+    firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(
+            sound: true, badge: true, alert: true, provisional: true));
+    firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+    firebaseMessaging.getToken().then((String token) async {
+      assert(token != null);
+      setState(() {
+        fcm = token;
+      });
+      print("fcm : $fcm");
+    });
     // badges = 100;
     // this._getToken();
     super.initState();
@@ -278,7 +299,7 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _homepageKey = new GlobalKey<ScaffoldState>();
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       new FlutterLocalNotificationsPlugin();
   var gold = Color.fromRGBO(
@@ -289,20 +310,40 @@ class _HomepageState extends State<Homepage>
   );
 
   Future<void> _getToken() async {
-    setState(() async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Stream<String> fcmStream = firebaseMessaging.onTokenRefresh;
+    fcmStream.listen((tokens) {
+      // saveToken(token);
+      print("fcm token is: $tokens");
+      fcm = tokens;
+    });
+    setState(() {
+      // firebaseMessaging.getToken().then((token) async {
+      //   print('fcm kenapa : ' + token);
+      //   fcm = token;
+      // });
       email = prefs.get('Email');
       token = prefs.get('Token');
       role = prefs.get('Role');
       idnya = prefs.get('Id');
     });
     print(role);
+
+    print("fcm nya :  $fcm");
     print("fcm nya :  $fcm");
   }
 
   @override
   void initState() {
-    print("fcm nya :  $fcm");
+    // Stream<String> fcmStream = firebaseMessaging.onTokenRefresh;
+    // fcmStream.listen((tokens) {
+    //   // saveToken(token);
+    //   setState(() {
+    //     print("fcm token is: $tokens");
+    //     fcm = tokens;
+    //   });
+    // });
+
     var initializationSettingsAndroid =
         new AndroidInitializationSettings('@mipmap/ic_launcher');
     var initializationSettingsIOS = new IOSInitializationSettings(
@@ -311,7 +352,7 @@ class _HomepageState extends State<Homepage>
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-    _firebaseMessaging.configure(
+    firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         setState(() {
           print("onMessage: $message");
@@ -334,6 +375,7 @@ class _HomepageState extends State<Homepage>
         });
       },
     );
+
     super.initState();
     _getToken();
   }
