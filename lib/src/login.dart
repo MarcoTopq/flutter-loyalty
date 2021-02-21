@@ -39,9 +39,12 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
       'Content-Type': 'application/x-www-form-urlencoded',
       "Accept": "application/JSON",
     };
+    print(emailController.text);
+    print(passwordController.text);
+    print(fcm);
 
     http.Response hasil =
-        await http.post(Uri.decodeFull("http://rpm.lensaborneo.id/api/login"),
+        await http.post(Uri.decodeFull(urls+"/api/login"),
             body: {
               "email": emailController.text,
               "password": passwordController.text,

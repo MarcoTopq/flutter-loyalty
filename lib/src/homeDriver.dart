@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:marquee_flutter/marquee_flutter.dart';
 import 'package:marquee_widget/marquee_widget.dart';
@@ -19,10 +20,11 @@ import 'package:warnakaltim/src/login.dart';
 import 'package:warnakaltim/src/model/HomeDriverModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:warnakaltim/src/model/driverModel.dart';
+import 'package:warnakaltim/src/qrcode.dart';
 import 'package:warnakaltim/src/profileDriver.dart';
 import 'package:warnakaltim/src/spring_button.dart';
 import 'package:warnakaltim/src/widget.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 
 class DriverHomeDetail extends StatefulWidget {
   // final email;
@@ -68,8 +70,8 @@ class _DriverHomeState extends State<DriverHomeDetail> {
   var prf;
 
   Future<void> _getToken() async {
-    setState(() async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
       prf = prefs;
       data = prefs.get('Idnya');
     });
@@ -97,7 +99,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
     double b_height = MediaQuery.of(context).size.width * 0.4;
 
     double a_width = MediaQuery.of(context).size.width * 0.6;
-    double a_height = MediaQuery.of(context).size.height* 0.5;
+    double a_height = MediaQuery.of(context).size.height * 0.65;
 
     double c_width = MediaQuery.of(context).size.width * 0.8;
     double c_height = MediaQuery.of(context).size.height * 0.3;
@@ -819,7 +821,8 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                             .readyDeliveryOrder[posisi == null
                                                                                 ? index
                                                                                 : posisi]
-                                                                            .deliveryOrderNumber,
+                                                                            .deliveryOrderNumber
+                                                                            .toString(),
                                                                     style: TextStyle(
                                                                         color: Colors
                                                                             .white,
@@ -931,10 +934,36 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                             15,
                                                                         fontWeight:
                                                                             FontWeight.bold)),
+                                                                Container(
+                                                                    padding:
+                                                                        EdgeInsets.all(
+                                                                            10),
+                                                                    width: 150,
+                                                                    height: 150,
+                                                                    child:
+                                                                        InkWell(
+                                                                      onTap:
+                                                                          () {
+                                                                        Navigator
+                                                                            .push(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (context) => Qrcode(url: _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].qrcode)),
+                                                                        );
+                                                                      },
+                                                                      child: SvgPicture.network(_listNews
+                                                                          .listHomeDetail[
+                                                                              0]
+                                                                          .user
+                                                                          .readyDeliveryOrder[posisi == null
+                                                                              ? index
+                                                                              : posisi]
+                                                                          .qrcode),
+                                                                    )),
                                                                 Padding(
                                                                     padding:
                                                                         EdgeInsets.all(
-                                                                            20)),
+                                                                            10)),
                                                                 Row(
                                                                   children: [
                                                                     Icon(
@@ -955,7 +984,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                 FontWeight.bold))
                                                                   ],
                                                                 ),
-                                                                 Padding(
+                                                                Padding(
                                                                     padding:
                                                                         EdgeInsets.all(
                                                                             2)),
@@ -1050,10 +1079,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                             children: <Widget>[
                                                                                               Text("Pengiriman Pesanan", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
 
-                                                                                              Text(
-                                                                                                "Apakah anda sudah selesai melakukan proses pengisian dan siap untuk berangkat ke lokasi customer?",
-                                                                                              style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)
-                                                                                              ),
+                                                                                              Text("Apakah anda sudah selesai melakukan proses pengisian dan siap untuk berangkat ke lokasi customer?", style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
                                                                                               // Text('Would you like to approve of this message?'),
                                                                                             ],
                                                                                           ),
@@ -1169,7 +1195,6 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                                             ),
                                                                                                           ],
                                                                                                         );
-                                                                                                      
                                                                                                       });
                                                                                                 }
                                                                                               });

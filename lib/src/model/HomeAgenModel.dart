@@ -181,10 +181,10 @@ class Category {
       };
 }
 
-enum CreatedAt { THE_15_OCTOBER_2020 }
+enum CreatedAt { KAMIS_15_OKTOBER_2020 }
 
 final createdAtValues =
-    EnumValues({"15 October 2020": CreatedAt.THE_15_OCTOBER_2020});
+    EnumValues({"Kamis, 15 Oktober 2020": CreatedAt.KAMIS_15_OKTOBER_2020});
 
 enum CreatedBy { ADMINISTRATOR }
 
@@ -435,6 +435,16 @@ class DeliveryOrder {
     this.salesOrderId,
     this.driver,
     this.bast,
+    this.piece,
+    this.depot,
+    this.quantityText,
+    this.doDate,
+    this.detailAddress,
+    this.transportir,
+    this.distribution,
+    this.adminName,
+    this.knowing,
+    this.qrcode,
   });
 
   int id;
@@ -459,8 +469,18 @@ class DeliveryOrder {
   dynamic departureTimeDepot;
   String status;
   int salesOrderId;
-  dynamic driver;
+  Driver driver;
   String bast;
+  String piece;
+  String depot;
+  String quantityText;
+  String doDate;
+  String detailAddress;
+  String transportir;
+  String distribution;
+  String adminName;
+  String knowing;
+  String qrcode;
 
   factory DeliveryOrder.fromJson(Map<String, dynamic> json) => DeliveryOrder(
         id: json["id"],
@@ -474,7 +494,7 @@ class DeliveryOrder {
         noVehicles: json["no_vehicles"],
         kmStart: json["km_start"],
         kmEnd: json["km_end"],
-        sgMeter: json["sg_meter"],
+        sgMeter: json["sg_meter"] == null ? null : json["sg_meter"],
         topSeal: json["top_seal"],
         bottomSeal: json["bottom_seal"],
         temperature: json["temperature"],
@@ -485,8 +505,19 @@ class DeliveryOrder {
         departureTimeDepot: json["departure_time_depot"],
         status: json["status"],
         salesOrderId: json["sales_order_id"],
-        driver: json["driver"],
+        driver: Driver.fromJson(json["driver"]),
         bast: json["bast"],
+        piece: json["piece"],
+        depot: json["depot"],
+        quantityText:
+            json["quantity_text"] == null ? null : json["quantity_text"],
+        doDate: json["do_date"],
+        detailAddress: json["detail_address"],
+        transportir: json["transportir"],
+        distribution: json["distribution"],
+        adminName: json["admin_name"],
+        knowing: json["knowing"],
+        qrcode: json["qrcode"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -501,7 +532,7 @@ class DeliveryOrder {
         "no_vehicles": noVehicles,
         "km_start": kmStart,
         "km_end": kmEnd,
-        "sg_meter": sgMeter,
+        "sg_meter": sgMeter == null ? null : sgMeter,
         "top_seal": topSeal,
         "bottom_seal": bottomSeal,
         "temperature": temperature,
@@ -512,8 +543,70 @@ class DeliveryOrder {
         "departure_time_depot": departureTimeDepot,
         "status": status,
         "sales_order_id": salesOrderId,
-        "driver": driver,
+        "driver": driver.toJson(),
         "bast": bast,
+        "piece": piece,
+        "depot": depot,
+        "quantity_text": quantityText == null ? null : quantityText,
+        "do_date": doDate,
+        "detail_address": detailAddress,
+        "transportir": transportir,
+        "distribution": distribution,
+        "admin_name": adminName,
+        "knowing": knowing,
+        "qrcode": qrcode,
+      };
+}
+
+class Driver {
+  Driver({
+    this.id,
+    this.name,
+    this.address,
+    this.phone,
+    this.avatar,
+    this.route,
+    this.userId,
+    this.agenId,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  int id;
+  String name;
+  String address;
+  String phone;
+  String avatar;
+  int route;
+  int userId;
+  int agenId;
+  String createdAt;
+  String updatedAt;
+
+  factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+        id: json["id"],
+        name: json["name"],
+        address: json["address"],
+        phone: json["phone"],
+        avatar: json["avatar"],
+        route: json["route"],
+        userId: json["user_id"],
+        agenId: json["agen_id"],
+        createdAt: json["created_at"],
+        updatedAt: json["updated_at"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "address": address,
+        "phone": phone,
+        "avatar": avatar,
+        "route": route,
+        "user_id": userId,
+        "agen_id": agenId,
+        "created_at": createdAt,
+        "updated_at": updatedAt,
       };
 }
 
@@ -573,11 +666,15 @@ class AgenHomeModel with ChangeNotifier {
   Future<void> fetchDataAgenHome() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.get('Token');
+    print("ini token home : " + token);
     final response = await http.get(Uri.encodeFull(urls + '/api/user/home'),
         headers: {
           "Accept": "application/JSON",
           "Authorization": 'Bearer ' + token
         });
+    print(response.headers);
+    print(response.body);
+    print(response.statusCode);
     if (response.statusCode == 200) {
       var convertData = json.decode(response.body);
       List<AgenHome> newData = [];

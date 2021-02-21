@@ -46,8 +46,8 @@ import 'package:warnakaltim/src/talk.dart';
 import 'package:warnakaltim/src/userHome.dart';
 import 'package:warnakaltim/src/doApproveAgen.dart';
 
-var urls = 'http://rpm.lensaborneo.id';
-// var urls = 'https://ppnloyaltycard.com';
+// var urls = 'http://rpm.lensaborneo.id';
+var urls = 'https://ppnloyaltycard.com';
 File files;
 var posisi;
 var idnya;
