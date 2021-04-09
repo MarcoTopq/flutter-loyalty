@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:warnakaltim/main.dart';
 import 'package:warnakaltim/src/all_Voucher.dart';
 import 'package:warnakaltim/src/model/detailVoucherModel.dart';
 import 'package:http/http.dart' as http;
@@ -91,11 +92,13 @@ class _DetailVoucherState extends State<DetailVoucher>
                                       color: Colors.white12,
                                       child: Column(
                                         children: <Widget>[
-                                          Image.network('http://rpm.kantordesa.com/uploads/'+
-                                            _listVoucherDetail
-                                                .listDetailVoucher[0]
-                                                .promo
-                                                .image,
+                                          Image.network(
+                                            urls +
+                                                '/uploads/' +
+                                                _listVoucherDetail
+                                                    .listDetailVoucher[0]
+                                                    .promo
+                                                    .image,
                                             // height: MediaQuery.of(context)
                                             //         .size
                                             //         .height *
@@ -110,51 +113,52 @@ class _DetailVoucherState extends State<DetailVoucher>
                                   SingleChildScrollView(
                                       // scrollDirection: Axis.vertical,
                                       child: Container(
-                                        height: 2000,
-                                        padding: EdgeInsets.all(10),
-                                        child:
-                                            Column(
-                                              children: <Widget>[
-                                            Text(
-                                          'KETERANGAN',
-                                          style: new TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                          Padding(
-                                              padding: EdgeInsets.all(10)),
-                                          Text(
-                                            _listVoucherDetail
-                                                .listDetailVoucher[0].promo
-                                                .description,
-                                            style: new TextStyle(
-                                              fontSize: 16.0,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.all(10)),
-                                          Text(
-                                            'PERSYARATAN',
-                                            style: new TextStyle(
-                                              fontSize: 16.0,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.all(10)),
-                                          Text(
-                                            _listVoucherDetail
-                                                .listDetailVoucher[0].promo.terms,
-                                            style: new TextStyle(
-                                              fontSize: 16.0,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        ],
-                                        )
-                                      )),
+                                          height: 2000,
+                                          padding: EdgeInsets.all(10),
+                                          child: Column(
+                                            children: <Widget>[
+                                              Text(
+                                                'KETERANGAN',
+                                                style: new TextStyle(
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              Padding(
+                                                  padding: EdgeInsets.all(10)),
+                                              Text(
+                                                _listVoucherDetail
+                                                    .listDetailVoucher[0]
+                                                    .promo
+                                                    .description,
+                                                style: new TextStyle(
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              Padding(
+                                                  padding: EdgeInsets.all(10)),
+                                              Text(
+                                                'PERSYARATAN',
+                                                style: new TextStyle(
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              Padding(
+                                                  padding: EdgeInsets.all(10)),
+                                              Text(
+                                                _listVoucherDetail
+                                                    .listDetailVoucher[0]
+                                                    .promo
+                                                    .terms,
+                                                style: new TextStyle(
+                                                  fontSize: 16.0,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            ],
+                                          ))),
                                 ],
                               ),
                               Positioned(

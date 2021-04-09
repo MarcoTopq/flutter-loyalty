@@ -120,7 +120,7 @@ class DoApprove {
 
 class DoApproveModel with ChangeNotifier {
   List<DoApprove> _listDoApprove = [];
-  List filteredDoApprove = new List();
+  List<DoApprove> filteredDoApprove =[];
   List<DoApprove> get listDoApprove {
     return [..._listDoApprove];
   }

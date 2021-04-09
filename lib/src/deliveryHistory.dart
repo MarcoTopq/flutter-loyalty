@@ -252,6 +252,10 @@ class _DeliveryHistoryDetailState extends State<DeliveryHistoryDetail> {
                                                               onTapDown:
                                                                   (_) async {
                                                             setState(() {
+                                                              print(_listDelivery
+                                                                  .listDeliveryHistory[
+                                                                      index]
+                                                                  .id);
                                                               Navigator.push(
                                                                   context,
                                                                   MaterialPageRoute(

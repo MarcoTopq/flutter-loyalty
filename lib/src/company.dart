@@ -1,8 +1,9 @@
-import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+// import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:warnakaltim/main.dart';
 // import 'package:warnakaltim/src/model/profileDetailModel.dart';
 // import 'package:flutter_plugin_pdf_viewer/flutter_plugin_pdf_viewer.dart';
-
 
 class CompanyDetail extends StatefulWidget {
   final url;
@@ -19,11 +20,11 @@ class CompanyDetail extends StatefulWidget {
 
 class _CompanyDetailState extends State<CompanyDetail> {
   bool _isLoading = true;
-  PDFDocument document;
+  // PDFDocument document;
 
   @override
   void initState() {
-    changePDF(2);
+    // changePDF(2);
     super.initState();
     loadDocument();
   }
@@ -34,18 +35,18 @@ class _CompanyDetailState extends State<CompanyDetail> {
     setState(() => _isLoading = false);
   }
 
-  changePDF(value) async {
-    setState(() => _isLoading = true);
-    if (value == 1) {
-      document = await PDFDocument.fromAsset('assets/sample2.pdf');
-    } else if (value == 2) {
-      document = await PDFDocument.fromURL(
-          "http://rpm.lensaborneo.id/uploads/profile/16036658023._BAB_II.pdf");
-    } else {
-      document = await PDFDocument.fromAsset('assets/sample.pdf');
-    }
-    setState(() => _isLoading = false);
-  }
+  // changePDF(value) async {
+  //   setState(() => _isLoading = true);
+  //   if (value == 1) {
+  //     document = await PDFDocument.fromAsset('assets/sample2.pdf');
+  //   } else if (value == 2) {
+  //     document = await PDFDocument.fromURL(
+  //         urls + "/uploads/profile/16036658023._BAB_II.pdf");
+  //   } else {
+  //     document = await PDFDocument.fromAsset('assets/sample.pdf');
+  //   }
+  //   setState(() => _isLoading = false);
+  // }
 
   var gold = Color.fromRGBO(
     212,
@@ -72,13 +73,15 @@ class _CompanyDetailState extends State<CompanyDetail> {
         backgroundColor: Colors.black.withOpacity(0.5),
       ),
       backgroundColor: Colors.grey[850],
-      body: Center(
-        child: Center(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : PDFViewer(document: document)),
+      body: WebviewScaffold(
+        url: widget.url,
       ),
-
+      // Center(
+      //   child: Center(
+      //       child: _isLoading
+      //           ? Center(child: CircularProgressIndicator())
+      //           : PDFViewer(document: document)),
+      // ),
     );
   }
 }

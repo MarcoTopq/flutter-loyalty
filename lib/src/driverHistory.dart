@@ -34,7 +34,7 @@ class _DriverHistoryState extends State<DriverHistory>
   @override
   void initState() {
     super.initState();
-    this.kirimdata();
+    // this.kirimdata();
   }
 
   Future<http.Response> kirimdata() async {
@@ -46,12 +46,12 @@ class _DriverHistoryState extends State<DriverHistory>
       "Authorization": 'Bearer ' + token
     };
 
-    http.Response hasil = await http.post(
-        Uri.decodeFull("http://rpm.kantordesa.com/api/delivery/code"),
-        body: {
-          "code": codeController.text,
-        },
-        headers: headers);
+    http.Response hasil =
+        await http.post(Uri.decodeFull(urls + "/api/delivery/code"),
+            body: {
+              "code": codeController.text,
+            },
+            headers: headers);
     return Future.value(hasil);
   }
 

@@ -774,20 +774,21 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                       color: gold,
                                                     ),
                                                   ),
-                                                  _listDetaildo
-                                                              .listDetailDo[
-                                                                  index]
-                                                              .bast
-                                                              .toString() ==
-                                                          "http://rpm.lensaborneo.id/uploads"
-                                                      ? Text(
-                                                          ' - ',
-                                                          style: new TextStyle(
-                                                            fontSize: 16.0,
-                                                            color: Colors.white,
-                                                          ),
-                                                        )
-                                                      : InkWell(
+                                                  // _listDetaildo
+                                                  //             .listDetailDo[
+                                                  //                 index]
+                                                  //             .bast
+                                                  //             .toString() ==
+                                                  //         "http://rpm.lensaborneo.id/uploads"
+                                                  //     ? Text(
+                                                  //         ' - ',
+                                                  //         style: new TextStyle(
+                                                  //           fontSize: 16.0,
+                                                  //           color: Colors.white,
+                                                  //         ),
+                                                  //       )
+                                                  //     : 
+                                                  InkWell(
                                                           child: Image.network(
                                                             // "http://rpm.lensaborneo.id/uploads/avatars/default.jpg",
 

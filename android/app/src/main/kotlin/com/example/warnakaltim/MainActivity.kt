@@ -1,4 +1,4 @@
-package com.example.warnakaltim
+package com.ppnloyaltycard.warnakaltim
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

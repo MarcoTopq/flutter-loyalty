@@ -270,7 +270,7 @@ class _UserHomeState extends State<UserHomeDetail> {
                                     pdf = _listNews
                                         .listHomeDetail[0].company.profile
                                         .toString();
-
+                                    print(pdf);
                                     return email != null
                                         ? Container()
                                         : Container(
@@ -1107,7 +1107,7 @@ class _UserHomeState extends State<UserHomeDetail> {
                                                     fontSize: 20)),
                                             Padding(
                                                 padding: EdgeInsets.all(20)),
-                                            FlatButton(
+                                            TextButton(
                                                 onPressed: () {
                                                   Navigator.push(
                                                       context,
@@ -1138,22 +1138,22 @@ class _UserHomeState extends State<UserHomeDetail> {
                                     itemCount: 4,
                                     // _listNews.listHomeDetail[0].hot.length,
                                     itemBuilder: (context, index) {
-                                      return Container(
-                                        padding: EdgeInsets.all(10),
-                                        width: a_width,
-                                        height: a_height,
-                                        child: Stack(
-                                            alignment: Alignment.topLeft,
-                                            children: <Widget>[
-                                              InkWell(
-                                                  onTap: () {
-                                                    _launchURL(_listNews
-                                                        .listHomeDetail[0]
-                                                        .videos[index]
-                                                        .url
-                                                        .toString());
-                                                  },
-                                                  child: Card(
+                                      return InkWell(
+                                          onTap: () {
+                                            _launchURL(_listNews
+                                                .listHomeDetail[0]
+                                                .videos[index]
+                                                .url
+                                                .toString());
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            width: a_width,
+                                            height: a_height,
+                                            child: Stack(
+                                                alignment: Alignment.topLeft,
+                                                children: <Widget>[
+                                                  Card(
                                                       shape:
                                                           RoundedRectangleBorder(
                                                         borderRadius:
@@ -1175,27 +1175,36 @@ class _UserHomeState extends State<UserHomeDetail> {
                                                         // 'assets/promo2.jpg',
                                                         height: 150,
                                                         fit: BoxFit.cover,
-                                                      ))),
-                                              Center(
-                                                  // top: 60.0,
-                                                  // left: 75.0,
-                                                  child: Container(
-                                                      color: Colors.yellow
-                                                          .withOpacity(0.5),
-                                                      child: Padding(
-                                                          padding: EdgeInsets
-                                                              .all(MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width /
-                                                                  150),
-                                                          child: Icon(
-                                                            Icons
-                                                                .play_circle_outline,
-                                                            size: 50,
-                                                          )))),
-                                            ]),
-                                      );
+                                                      )),
+                                                  Center(
+                                                    // top: 60.0,
+                                                    // left: 75.0,
+                                                    child: InkWell(
+                                                        onTap: () {
+                                                          _launchURL(_listNews
+                                                              .listHomeDetail[0]
+                                                              .videos[index]
+                                                              .url
+                                                              .toString());
+                                                        },
+                                                        child: Container(
+                                                            color: Colors.yellow
+                                                                .withOpacity(
+                                                                    0.5),
+                                                            child: Padding(
+                                                                padding: EdgeInsets.all(
+                                                                    MediaQuery.of(context)
+                                                                            .size
+                                                                            .width /
+                                                                        150),
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .play_circle_outline,
+                                                                  size: 50,
+                                                                )))),
+                                                  )
+                                                ]),
+                                          ));
                                     },
                                   ),
                                 ),

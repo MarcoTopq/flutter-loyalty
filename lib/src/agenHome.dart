@@ -277,7 +277,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                     pdf = _listNews
                                         .listHomeDetail[0].company.profile
                                         .toString();
-
+                                    print('pdfnya'+pdf);
                                     return email != null
                                         ? Container()
                                         : Container(
@@ -717,7 +717,11 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                                             //             right:
                                                             //                 10)),
                                                             Padding(
-                                                              padding: const EdgeInsets.only(right: 15.0),
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      right:
+                                                                          15.0),
                                                               child: InkWell(
                                                                 onTap: () {
                                                                   Navigator.push(
@@ -728,11 +732,13 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                                                                 DoApproveAgen(),
                                                                       ));
                                                                 },
-                                                                child: badges == 0
+                                                                child: badges ==
+                                                                        0
                                                                     ? Icon(
                                                                         Icons
                                                                             .notifications_active,
-                                                                        size: 30,
+                                                                        size:
+                                                                            30,
                                                                         color:
                                                                             gold,
                                                                       )
@@ -899,7 +905,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                                     fontSize: 20)),
                                             Padding(
                                                 padding: EdgeInsets.all(20)),
-                                            FlatButton(
+                                            TextButton(
                                                 onPressed: () {
                                                   Navigator.push(
                                                       context,
@@ -976,21 +982,29 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                               Center(
                                                   // top: 60.0,
                                                   // left: 75.0,
-                                                  child: Container(
-                                                      color: Colors.yellow
-                                                          .withOpacity(0.5),
-                                                      child: Padding(
-                                                          padding: EdgeInsets
-                                                              .all(MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width /
-                                                                  150),
-                                                          child: Icon(
-                                                            Icons
-                                                                .play_circle_outline,
-                                                            size: 50,
-                                                          )))),
+                                                  child: InkWell(
+                                                      onTap: () {
+                                                        _launchURL(_listNews
+                                                            .listHomeDetail[0]
+                                                            .videos[index]
+                                                            .url
+                                                            .toString());
+                                                      },
+                                                      child: Container(
+                                                          color: Colors.yellow
+                                                              .withOpacity(0.5),
+                                                          child: Padding(
+                                                              padding: EdgeInsets.all(
+                                                                  MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width /
+                                                                      150),
+                                                              child: Icon(
+                                                                Icons
+                                                                    .play_circle_outline,
+                                                                size: 50,
+                                                              ))))),
                                             ]),
                                       );
                                     },
@@ -1473,7 +1487,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                               SalesOrderDetail()));
                                 },
                               )),
-                           Container(
+                          Container(
                               padding: EdgeInsets.only(top: 2),
                               decoration: new BoxDecoration(
                                   color: Colors.black12,
@@ -1493,8 +1507,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              Allcritic()));
+                                          builder: (context) => Allcritic()));
                                 },
                               )),
                           Container(

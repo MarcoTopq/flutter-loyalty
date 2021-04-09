@@ -207,7 +207,8 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                         .bold)),
                                                       ),
                                                       DataColumn(
-                                                        label: Text('Bast      ',
+                                                        label: Text(
+                                                            'Bast      ',
                                                             style: TextStyle(
                                                                 color: gold,
                                                                 fontSize: 15,
@@ -341,11 +342,15 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                             false),
                                                                         onTapDown:
                                                                             (_) async {
+                                                                      print('idnya' +
+                                                                          delivery
+                                                                              .id
+                                                                              .toString());
                                                                       setState(
                                                                           () {
                                                                         Navigator.push(
                                                                             context,
-                                                                            MaterialPageRoute(builder: (context) => DriverHistory(id: _listDetaildoAgen.listDetailDoAgen[index].id.toString())));
+                                                                            MaterialPageRoute(builder: (context) => DriverHistory(id: delivery.id.toString())));
                                                                       });
                                                                     }),
                                                                   ),
@@ -460,10 +465,12 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                       child: Container(
                                                                           // padding: EdgeInsets.only(left: 25),
                                                                           width: 50.0,
-                                                                          child: Image.network(
-                                                                            delivery.bast.toString(),
-                                                                            // width: 100,
-                                                                          ))),
+                                                                          child: delivery.bast.toString().length > 35
+                                                                              ? Image.network(
+                                                                                  delivery.bast.toString(),
+                                                                                  // width: 100,
+                                                                                )
+                                                                              : Text('-'))),
                                                                   onTap: () {
                                                                     Navigator.push(
                                                                         context,

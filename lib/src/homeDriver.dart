@@ -99,7 +99,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
     double b_height = MediaQuery.of(context).size.width * 0.4;
 
     double a_width = MediaQuery.of(context).size.width * 0.6;
-    double a_height = MediaQuery.of(context).size.height * 0.65;
+    double a_height = MediaQuery.of(context).size.height * 0.75;
 
     double c_width = MediaQuery.of(context).size.width * 0.8;
     double c_height = MediaQuery.of(context).size.height * 0.3;

@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:warnakaltim/src/agenHome.dart';
 import 'package:warnakaltim/src/chartAgen.dart';
@@ -232,7 +234,8 @@ class _MyAppState extends State<MyApp> {
             value: CriticDetailModel(),
           ),
         ],
-        child: MaterialApp(
+        child: OverlaySupport(
+            child: MaterialApp(
           title: 'Warna Kaltim',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -260,7 +263,7 @@ class _MyAppState extends State<MyApp> {
               // )
               ),
           home: Splash(),
-        ));
+        )));
   }
 }
 
@@ -357,13 +360,45 @@ class _HomepageState extends State<Homepage>
         setState(() {
           print("onMessage: $message");
           // _showItemDialog(message);
-          showNotification(message['title'], message['body']);
+          // Get.snackbar(
+          //   message['title'],
+          //   message['body'],
+          //   snackPosition: SnackPosition.TOP,
+          // );
+          // showOverlayNotification((context) {
+          //   return Card(
+          //     margin: const EdgeInsets.symmetric(horizontal: 4),
+          //     child: SafeArea(
+          //       child: ListTile(
+          //         leading: SizedBox.fromSize(
+          //             size: const Size(40, 40),
+          //             child: ClipOval(
+          //                 child: Container(
+          //               color: Colors.black,
+          //             ))),
+          //         title: Text(message['notification']['title']),
+          //         subtitle: Text(message['notification']['body']),
+          //         trailing: IconButton(
+          //             icon: Icon(Icons.close),
+          //             onPressed: () {
+          //               OverlaySupportEntry.of(context).dismiss();
+          //             }),
+          //       ),
+          //     ),
+          //   );
+          // }, duration: Duration(milliseconds: 4000));
+          showNotification(
+            message['notification']['title'],
+            message['notification']['body'],
+          );
+          // _navigateToItemDetail(message);
         });
       },
       onLaunch: (Map<String, dynamic> message) async {
         setState(() {
           print("onLaunch: $message");
           showNotification(message['title'], message['body']);
+          _navigateToItemDetail(message);
         });
       },
       onResume: (Map<String, dynamic> message) async {

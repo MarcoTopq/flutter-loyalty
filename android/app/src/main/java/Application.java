@@ -1,4 +1,4 @@
-package com.example.warnakaltim;
+package com.ppnloyaltycard.warnakaltim;
 
 import io.flutter.app.FlutterApplication;
 import io.flutter.plugin.common.PluginRegistry;
