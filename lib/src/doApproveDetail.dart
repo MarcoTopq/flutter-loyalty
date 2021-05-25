@@ -851,7 +851,7 @@ class _DoApproveDetailAgenState extends State<DoApproveDetailAgen>
                                                           _listDoApproveDetail
                                                               .listDoApproveDetail[
                                                                   index]
-                                                              .driver['name']
+                                                              .driver.name
                                                               .toString(),
                                                           style: new TextStyle(
                                                             fontSize: 16.0,
@@ -891,7 +891,7 @@ class _DoApproveDetailAgenState extends State<DoApproveDetailAgen>
                                                           _listDoApproveDetail
                                                               .listDoApproveDetail[
                                                                   index]
-                                                              .driver['phone']
+                                                              .driver.name
                                                               .toString(),
                                                           style: new TextStyle(
                                                             fontSize: 16.0,

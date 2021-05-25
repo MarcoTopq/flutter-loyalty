@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -190,15 +188,15 @@ class DeliveryOrder {
     String topSeal;
     String bottomSeal;
     String temperature;
-    dynamic departureTime;
-    dynamic arrivalTime;
+    String departureTime;
+    String arrivalTime;
     dynamic unloadingStartTime;
-    dynamic unloadingEndTime;
+    DateTime unloadingEndTime;
     dynamic departureTimeDepot;
     String status;
     int salesOrderId;
     Driver driver;
-    String bast;
+    List<Bast> bast;
     String piece;
     String depot;
     String quantityText;
@@ -226,18 +224,18 @@ class DeliveryOrder {
         topSeal: json["top_seal"],
         bottomSeal: json["bottom_seal"],
         temperature: json["temperature"],
-        departureTime: json["departure_time"],
-        arrivalTime: json["arrival_time"],
+        departureTime: json["departure_time"] == null ? null : json["departure_time"],
+        arrivalTime: json["arrival_time"] == null ? null : json["arrival_time"],
         unloadingStartTime: json["unloading_start_time"],
-        unloadingEndTime: json["unloading_end_time"],
+        unloadingEndTime: json["unloading_end_time"] == null ? null : DateTime.parse(json["unloading_end_time"]),
         departureTimeDepot: json["departure_time_depot"],
         status: json["status"],
         salesOrderId: json["sales_order_id"],
         driver: Driver.fromJson(json["driver"]),
-        bast: json["bast"],
+        bast: List<Bast>.from(json["bast"].map((x) => Bast.fromJson(x))),
         piece: json["piece"],
         depot: json["depot"],
-        quantityText: json["quantity_text"] == null ? null : json["quantity_text"],
+        quantityText: json["quantity_text"],
         doDate: json["do_date"],
         detailAddress: json["detail_address"],
         transportir: json["transportir"],
@@ -263,18 +261,18 @@ class DeliveryOrder {
         "top_seal": topSeal,
         "bottom_seal": bottomSeal,
         "temperature": temperature,
-        "departure_time": departureTime,
-        "arrival_time": arrivalTime,
+        "departure_time": departureTime == null ? null : departureTime,
+        "arrival_time": arrivalTime == null ? null : arrivalTime,
         "unloading_start_time": unloadingStartTime,
-        "unloading_end_time": unloadingEndTime,
+        "unloading_end_time": unloadingEndTime == null ? null : unloadingEndTime.toIso8601String(),
         "departure_time_depot": departureTimeDepot,
         "status": status,
         "sales_order_id": salesOrderId,
         "driver": driver.toJson(),
-        "bast": bast,
+        "bast": List<dynamic>.from(bast.map((x) => x.toJson())),
         "piece": piece,
         "depot": depot,
-        "quantity_text": quantityText == null ? null : quantityText,
+        "quantity_text": quantityText,
         "do_date": doDate,
         "detail_address": detailAddress,
         "transportir": transportir,
@@ -282,6 +280,38 @@ class DeliveryOrder {
         "admin_name": adminName,
         "knowing": knowing,
         "qrcode": qrcode,
+    };
+}
+
+class Bast {
+    Bast({
+        this.id,
+        this.deliveryOrderId,
+        this.bast,
+        this.createdAt,
+        this.updatedAt,
+    });
+
+    int id;
+    int deliveryOrderId;
+    String bast;
+    String createdAt;
+    String updatedAt;
+
+    factory Bast.fromJson(Map<String, dynamic> json) => Bast(
+        id: json["id"],
+        deliveryOrderId: json["delivery_order_id"],
+        bast: json["bast"],
+        createdAt: json["created_at"],
+        updatedAt: json["updated_at"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "delivery_order_id": deliveryOrderId,
+        "bast": bast,
+        "created_at": createdAt,
+        "updated_at": updatedAt,
     };
 }
 
@@ -336,7 +366,6 @@ class Driver {
         "updated_at": updatedAt,
     };
 }
-
 class DriverHomeModel with ChangeNotifier {
   List<DriverHome> _listHomeDetail = [];
   List filteredHomeDetail = new List();

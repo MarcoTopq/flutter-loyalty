@@ -68,11 +68,11 @@ class Company {
 
     int id;
     String name;
-    dynamic description;
+    String description;
     String profile;
     String email;
-    dynamic phone;
-    dynamic website;
+    String phone;
+    String website;
     DateTime createdAt;
     DateTime updatedAt;
     String profiledownload;
@@ -123,10 +123,10 @@ class Event {
     String image;
     String url;
     int view;
-    String start;
+    CreatedAt start;
     String end;
-    String createdAt;
-    String createdBy;
+    CreatedAt createdAt;
+    CreatedBy createdBy;
     List<Category> category;
 
     factory Event.fromJson(Map<String, dynamic> json) => Event(
@@ -135,10 +135,10 @@ class Event {
         image: json["image"],
         url: json["url"],
         view: json["view"],
-        start: json["start"] == null ? null : json["start"],
+        start: json["start"] == null ? null : createdAtValues.map[json["start"]],
         end: json["end"] == null ? null : json["end"],
-        createdAt: json["created_at"],
-        createdBy: json["created_by"],
+        createdAt: createdAtValues.map[json["created_at"]],
+        createdBy: createdByValues.map[json["created_by"]],
         category: List<Category>.from(json["category"].map((x) => Category.fromJson(x))),
     );
 
@@ -148,10 +148,10 @@ class Event {
         "image": image,
         "url": url,
         "view": view,
-        "start": start == null ? null : start,
+        "start": start == null ? null : createdAtValues.reverse[start],
         "end": end == null ? null : end,
-        "created_at": createdAt,
-        "created_by": createdBy,
+        "created_at": createdAtValues.reverse[createdAt],
+        "created_by": createdByValues.reverse[createdBy],
         "category": List<dynamic>.from(category.map((x) => x.toJson())),
     };
 }
@@ -176,6 +176,18 @@ class Category {
     };
 }
 
+enum CreatedAt { MINGGU_9_MEI_2021 }
+
+final createdAtValues = EnumValues({
+    "Minggu, 9 Mei 2021": CreatedAt.MINGGU_9_MEI_2021
+});
+
+enum CreatedBy { ADMINISTRATOR }
+
+final createdByValues = EnumValues({
+    "administrator": CreatedBy.ADMINISTRATOR
+});
+
 class Hot {
     Hot({
         this.id,
@@ -199,9 +211,9 @@ class Hot {
     int point;
     int total;
     int view;
-    String status;
-    String createdAt;
-    String createdBy;
+    Status status;
+    CreatedAt createdAt;
+    CreatedBy createdBy;
 
     factory Hot.fromJson(Map<String, dynamic> json) => Hot(
         id: json["id"],
@@ -212,9 +224,9 @@ class Hot {
         point: json["point"],
         total: json["total"],
         view: json["view"],
-        status: json["status"],
-        createdAt: json["created_at"],
-        createdBy: json["created_by"],
+        status: statusValues.map[json["status"]],
+        createdAt: createdAtValues.map[json["created_at"]],
+        createdBy: createdByValues.map[json["created_by"]],
     );
 
     Map<String, dynamic> toJson() => {
@@ -226,11 +238,18 @@ class Hot {
         "point": point,
         "total": total,
         "view": view,
-        "status": status,
-        "created_at": createdAt,
-        "created_by": createdBy,
+        "status": statusValues.reverse[status],
+        "created_at": createdAtValues.reverse[createdAt],
+        "created_by": createdByValues.reverse[createdBy],
     };
 }
+
+enum Status { HOT, NORMAL }
+
+final statusValues = EnumValues({
+    "hot": Status.HOT,
+    "normal": Status.NORMAL
+});
 
 class User {
     User({
@@ -247,7 +266,7 @@ class User {
     String email;
     int roleId;
     String fcmToken;
-    String createdAt;
+    CreatedAt createdAt;
     String updatedAt;
     Customer customer;
 
@@ -256,7 +275,7 @@ class User {
         email: json["email"],
         roleId: json["role_id"],
         fcmToken: json["fcm_token"],
-        createdAt: json["created_at"],
+        createdAt: createdAtValues.map[json["created_at"]],
         updatedAt: json["updated_at"],
         customer: Customer.fromJson(json["customer"]),
     );
@@ -266,7 +285,7 @@ class User {
         "email": email,
         "role_id": roleId,
         "fcm_token": fcmToken,
-        "created_at": createdAt,
+        "created_at": createdAtValues.reverse[createdAt],
         "updated_at": updatedAt,
         "customer": customer.toJson(),
     };
@@ -304,12 +323,12 @@ class Customer {
     String cardImage;
     String logo;
     int userId;
-    String createdAt;
+    CreatedAt createdAt;
     String updatedAt;
     int coupon;
     int sumDeliveryOrder;
     List<SalesOrder> salesOrders;
-    List<Voucher> vouchers;
+    List<dynamic> vouchers;
 
     factory Customer.fromJson(Map<String, dynamic> json) => Customer(
         id: json["id"],
@@ -323,12 +342,12 @@ class Customer {
         cardImage: json["card_image"],
         logo: json["logo"],
         userId: json["user_id"],
-        createdAt: json["created_at"],
+        createdAt: createdAtValues.map[json["created_at"]],
         updatedAt: json["updated_at"],
         coupon: json["coupon"],
         sumDeliveryOrder: json["sum_delivery_order"],
         salesOrders: List<SalesOrder>.from(json["sales_orders"].map((x) => SalesOrder.fromJson(x))),
-        vouchers: List<Voucher>.from(json["vouchers"].map((x) => Voucher.fromJson(x))),
+        vouchers: List<dynamic>.from(json["vouchers"].map((x) => x)),
     );
 
     Map<String, dynamic> toJson() => {
@@ -343,12 +362,12 @@ class Customer {
         "card_image": cardImage,
         "logo": logo,
         "user_id": userId,
-        "created_at": createdAt,
+        "created_at": createdAtValues.reverse[createdAt],
         "updated_at": updatedAt,
         "coupon": coupon,
         "sum_delivery_order": sumDeliveryOrder,
         "sales_orders": List<dynamic>.from(salesOrders.map((x) => x.toJson())),
-        "vouchers": List<dynamic>.from(vouchers.map((x) => x.toJson())),
+        "vouchers": List<dynamic>.from(vouchers.map((x) => x)),
     };
 }
 
@@ -426,6 +445,16 @@ class DeliveryOrder {
         this.salesOrderId,
         this.driver,
         this.bast,
+        this.piece,
+        this.depot,
+        this.quantityText,
+        this.doDate,
+        this.detailAddress,
+        this.transportir,
+        this.distribution,
+        this.adminName,
+        this.knowing,
+        this.qrcode,
     });
 
     int id;
@@ -443,15 +472,25 @@ class DeliveryOrder {
     String topSeal;
     String bottomSeal;
     String temperature;
-    dynamic departureTime;
-    dynamic arrivalTime;
+    String departureTime;
+    String arrivalTime;
     dynamic unloadingStartTime;
-    dynamic unloadingEndTime;
+    DateTime unloadingEndTime;
     dynamic departureTimeDepot;
     String status;
     int salesOrderId;
     Driver driver;
-    String bast;
+    List<Bast> bast;
+    String piece;
+    String depot;
+    String quantityText;
+    String doDate;
+    String detailAddress;
+    String transportir;
+    String distribution;
+    String adminName;
+    String knowing;
+    String qrcode;
 
     factory DeliveryOrder.fromJson(Map<String, dynamic> json) => DeliveryOrder(
         id: json["id"],
@@ -472,12 +511,22 @@ class DeliveryOrder {
         departureTime: json["departure_time"],
         arrivalTime: json["arrival_time"],
         unloadingStartTime: json["unloading_start_time"],
-        unloadingEndTime: json["unloading_end_time"],
+        unloadingEndTime: DateTime.parse(json["unloading_end_time"]),
         departureTimeDepot: json["departure_time_depot"],
         status: json["status"],
         salesOrderId: json["sales_order_id"],
         driver: Driver.fromJson(json["driver"]),
-        bast: json["bast"],
+        bast: List<Bast>.from(json["bast"].map((x) => Bast.fromJson(x))),
+        piece: json["piece"],
+        depot: json["depot"],
+        quantityText: json["quantity_text"],
+        doDate: json["do_date"],
+        detailAddress: json["detail_address"],
+        transportir: json["transportir"],
+        distribution: json["distribution"],
+        adminName: json["admin_name"],
+        knowing: json["knowing"],
+        qrcode: json["qrcode"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -499,12 +548,54 @@ class DeliveryOrder {
         "departure_time": departureTime,
         "arrival_time": arrivalTime,
         "unloading_start_time": unloadingStartTime,
-        "unloading_end_time": unloadingEndTime,
+        "unloading_end_time": unloadingEndTime.toIso8601String(),
         "departure_time_depot": departureTimeDepot,
         "status": status,
         "sales_order_id": salesOrderId,
         "driver": driver.toJson(),
+        "bast": List<dynamic>.from(bast.map((x) => x.toJson())),
+        "piece": piece,
+        "depot": depot,
+        "quantity_text": quantityText,
+        "do_date": doDate,
+        "detail_address": detailAddress,
+        "transportir": transportir,
+        "distribution": distribution,
+        "admin_name": adminName,
+        "knowing": knowing,
+        "qrcode": qrcode,
+    };
+}
+
+class Bast {
+    Bast({
+        this.id,
+        this.deliveryOrderId,
+        this.bast,
+        this.createdAt,
+        this.updatedAt,
+    });
+
+    int id;
+    int deliveryOrderId;
+    String bast;
+    String createdAt;
+    String updatedAt;
+
+    factory Bast.fromJson(Map<String, dynamic> json) => Bast(
+        id: json["id"],
+        deliveryOrderId: json["delivery_order_id"],
+        bast: json["bast"],
+        createdAt: json["created_at"],
+        updatedAt: json["updated_at"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "delivery_order_id": deliveryOrderId,
         "bast": bast,
+        "created_at": createdAt,
+        "updated_at": updatedAt,
     };
 }
 
@@ -560,38 +651,6 @@ class Driver {
     };
 }
 
-class Voucher {
-    Voucher({
-        this.id,
-        this.promoId,
-        this.customerId,
-        this.createdAt,
-        this.promo,
-    });
-
-    int id;
-    int promoId;
-    int customerId;
-    String createdAt;
-    Hot promo;
-
-    factory Voucher.fromJson(Map<String, dynamic> json) => Voucher(
-        id: json["id"],
-        promoId: json["promo_id"],
-        customerId: json["customer_id"],
-        createdAt: json["created_at"],
-        promo: Hot.fromJson(json["promo"]),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "promo_id": promoId,
-        "customer_id": customerId,
-        "created_at": createdAt,
-        "promo": promo.toJson(),
-    };
-}
-
 class Video {
     Video({
         this.id,
@@ -605,14 +664,14 @@ class Video {
     String title;
     String image;
     String url;
-    String createdAt;
+    CreatedAt createdAt;
 
     factory Video.fromJson(Map<String, dynamic> json) => Video(
         id: json["id"],
         title: json["title"],
         image: json["image"],
         url: json["url"],
-        createdAt: json["created_at"],
+        createdAt: createdAtValues.map[json["created_at"]],
     );
 
     Map<String, dynamic> toJson() => {
@@ -620,8 +679,22 @@ class Video {
         "title": title,
         "image": image,
         "url": url,
-        "created_at": createdAt,
+        "created_at": createdAtValues.reverse[createdAt],
     };
+}
+
+class EnumValues<T> {
+    Map<String, T> map;
+    Map<T, String> reverseMap;
+
+    EnumValues(this.map);
+
+    Map<T, String> get reverse {
+        if (reverseMap == null) {
+            reverseMap = map.map((k, v) => new MapEntry(v, k));
+        }
+        return reverseMap;
+    }
 }
 
 class UserHomeModel with ChangeNotifier {

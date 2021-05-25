@@ -4,66 +4,84 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:warnakaltim/main.dart';
 
-List<DoApprove> doApproveFromJson(String str) =>
-    List<DoApprove>.from(json.decode(str).map((x) => DoApprove.fromJson(x)));
+List<DoApprove> doApproveFromJson(String str) => List<DoApprove>.from(json.decode(str).map((x) => DoApprove.fromJson(x)));
 
-String doApproveToJson(List<DoApprove> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String doApproveToJson(List<DoApprove> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class DoApprove {
-  DoApprove({
-    this.id,
-    this.deliveryOrderNumber,
-    this.effectiveDateStart,
-    this.effectiveDateEnd,
-    this.product,
-    this.quantity,
-    this.shippedWith,
-    this.shippedVia,
-    this.noVehicles,
-    this.kmStart,
-    this.kmEnd,
-    this.sgMeter,
-    this.topSeal,
-    this.bottomSeal,
-    this.temperature,
-    this.departureTime,
-    this.arrivalTime,
-    this.unloadingStartTime,
-    this.unloadingEndTime,
-    this.departureTimeDepot,
-    this.status,
-    this.salesOrderId,
-    this.driver,
-    this.bast,
-  });
+    DoApprove({
+        this.id,
+        this.deliveryOrderNumber,
+        this.effectiveDateStart,
+        this.effectiveDateEnd,
+        this.product,
+        this.quantity,
+        this.shippedWith,
+        this.shippedVia,
+        this.noVehicles,
+        this.kmStart,
+        this.kmEnd,
+        this.sgMeter,
+        this.topSeal,
+        this.bottomSeal,
+        this.temperature,
+        this.departureTime,
+        this.arrivalTime,
+        this.unloadingStartTime,
+        this.unloadingEndTime,
+        this.departureTimeDepot,
+        this.status,
+        this.salesOrderId,
+        this.driver,
+        this.bast,
+        this.piece,
+        this.depot,
+        this.quantityText,
+        this.doDate,
+        this.detailAddress,
+        this.transportir,
+        this.distribution,
+        this.adminName,
+        this.knowing,
+        this.qrcode,
+    });
 
-  int id;
-  String deliveryOrderNumber;
-  String effectiveDateStart;
-  String effectiveDateEnd;
-  String product;
-  int quantity;
-  String shippedWith;
-  String shippedVia;
-  String noVehicles;
-  int kmStart;
-  String kmEnd;
-  String sgMeter;
-  String topSeal;
-  String bottomSeal;
-  String temperature;
-  dynamic departureTime;
-  dynamic arrivalTime;
-  dynamic unloadingStartTime;
-  dynamic unloadingEndTime;
-  dynamic departureTimeDepot;
-  String status;
-  int salesOrderId;
-  dynamic driver;
-  String bast;
+    int id;
+    String deliveryOrderNumber;
+    String effectiveDateStart;
+    String effectiveDateEnd;
+    String product;
+    int quantity;
+    String shippedWith;
+    String shippedVia;
+    String noVehicles;
+    int kmStart;
+    String kmEnd;
+    dynamic sgMeter;
+    String topSeal;
+    String bottomSeal;
+    String temperature;
+    dynamic departureTime;
+    dynamic arrivalTime;
+    dynamic unloadingStartTime;
+    dynamic unloadingEndTime;
+    dynamic departureTimeDepot;
+    String status;
+    int salesOrderId;
+    Driver driver;
+    List<dynamic> bast;
+    String piece;
+    String depot;
+    String quantityText;
+    String doDate;
+    String detailAddress;
+    String transportir;
+    String distribution;
+    String adminName;
+    String knowing;
+    String qrcode;
 
-  factory DoApprove.fromJson(Map<String, dynamic> json) => DoApprove(
+    factory DoApprove.fromJson(Map<String, dynamic> json) => DoApprove(
         id: json["id"],
         deliveryOrderNumber: json["delivery_order_number"],
         effectiveDateStart: json["effective_date_start"],
@@ -86,11 +104,21 @@ class DoApprove {
         departureTimeDepot: json["departure_time_depot"],
         status: json["status"],
         salesOrderId: json["sales_order_id"],
-        driver: json["driver"],
-        bast: json["bast"],
-      );
+        driver: Driver.fromJson(json["driver"]),
+        bast: List<dynamic>.from(json["bast"].map((x) => x)),
+        piece: json["piece"],
+        depot: json["depot"],
+        quantityText: json["quantity_text"],
+        doDate: json["do_date"],
+        detailAddress: json["detail_address"],
+        transportir: json["transportir"],
+        distribution: json["distribution"],
+        adminName: json["admin_name"],
+        knowing: json["knowing"],
+        qrcode: json["qrcode"],
+    );
 
-  Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toJson() => {
         "id": id,
         "delivery_order_number": deliveryOrderNumber,
         "effective_date_start": effectiveDateStart,
@@ -113,9 +141,71 @@ class DoApprove {
         "departure_time_depot": departureTimeDepot,
         "status": status,
         "sales_order_id": salesOrderId,
-        "driver": driver,
-        "bast": bast,
-      };
+        "driver": driver.toJson(),
+        "bast": List<dynamic>.from(bast.map((x) => x)),
+        "piece": piece,
+        "depot": depot,
+        "quantity_text": quantityText,
+        "do_date": doDate,
+        "detail_address": detailAddress,
+        "transportir": transportir,
+        "distribution": distribution,
+        "admin_name": adminName,
+        "knowing": knowing,
+        "qrcode": qrcode,
+    };
+}
+
+class Driver {
+    Driver({
+        this.id,
+        this.name,
+        this.address,
+        this.phone,
+        this.avatar,
+        this.route,
+        this.userId,
+        this.agenId,
+        this.createdAt,
+        this.updatedAt,
+    });
+
+    int id;
+    String name;
+    String address;
+    String phone;
+    String avatar;
+    int route;
+    int userId;
+    int agenId;
+    String createdAt;
+    String updatedAt;
+
+    factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+        id: json["id"],
+        name: json["name"],
+        address: json["address"],
+        phone: json["phone"],
+        avatar: json["avatar"],
+        route: json["route"],
+        userId: json["user_id"],
+        agenId: json["agen_id"],
+        createdAt: json["created_at"],
+        updatedAt: json["updated_at"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "address": address,
+        "phone": phone,
+        "avatar": avatar,
+        "route": route,
+        "user_id": userId,
+        "agen_id": agenId,
+        "created_at": createdAt,
+        "updated_at": updatedAt,
+    };
 }
 
 class DoApproveModel with ChangeNotifier {

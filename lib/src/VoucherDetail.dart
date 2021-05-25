@@ -177,7 +177,7 @@ class _DetailVoucherCustomerState extends State<DetailVoucherCustomer>
                                                                   MaterialPageRoute(
                                                                       builder:
                                                                           (context) =>
-                                                                              Bast(
+                                                                              BastPage(
                                                                                 url: _listDetailVoucher.detailCusVoucher[0].promo.image.toString(),
                                                                               )));
                                                             },

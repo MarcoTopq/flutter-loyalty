@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:marquee_flutter/marquee_flutter.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:toast/toast.dart';
 import 'package:warnakaltim/src/all_arrival.dart';
@@ -24,10 +23,14 @@ import 'package:warnakaltim/src/qrcode.dart';
 import 'package:warnakaltim/src/profileDriver.dart';
 import 'package:warnakaltim/src/spring_button.dart';
 import 'package:warnakaltim/src/widget.dart';
+
+import 'camera.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
 class DriverHomeDetail extends StatefulWidget {
-  // final email;
+  final XFile result;
+
+  const DriverHomeDetail({Key key, this.result}) : super(key: key);
   // final token;
   // DriverHomeDetail({
   //   Key key,
@@ -42,7 +45,6 @@ class DriverHomeDetail extends StatefulWidget {
 Future<http.Response> logout() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.get('Token');
-
   http.Response hasil =
       await http.post(Uri.decodeFull(urls + "/api/logout"), body: {
     // "email": emailController.text,
@@ -92,6 +94,8 @@ class _DriverHomeState extends State<DriverHomeDetail> {
 
   @override
   Widget build(BuildContext context) {
+    XFile images;
+
     print('dapat' + email.toString());
     print('dapat' + token.toString());
 
@@ -1012,11 +1016,16 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                   SpringButtonType.OnlyScale,
                                                                                   roundedRectButton("Upload", signUpGradients, false),
                                                                                   onTapDown: (_) async {
-                                                                                    files = await FilePicker.getFile();
+                                                                                    images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
+                                                                                    // files = await FilePicker.getFile();
+                                                                                    // print(result);
                                                                                     setState(() {
+                                                                                      // images = result;
                                                                                       file = 1;
-                                                                                      print(files);
-                                                                                      print(file);
+                                                                                      // print(files);
+                                                                                      print(images);
+                                                                                      // print("gilaaaaa " + result.toString());
+
                                                                                       // data= null;
                                                                                     });
                                                                                     // _btnController
@@ -1029,12 +1038,12 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                   },
                                                                                 ),
                                                                               ),
-                                                                              file == null
+                                                                              images == null
                                                                                   ? Container()
                                                                                   : Container(
                                                                                       padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
                                                                                       child: Image.file(
-                                                                                        files,
+                                                                                        File(widget.result.path),
                                                                                         width: 80,
                                                                                         height: 80,
                                                                                         fit: BoxFit.cover,
@@ -1404,11 +1413,15 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                 false),
                                                                             onTapDown:
                                                                                 (_) async {
-                                                                              files = await FilePicker.getFile();
+                                                                             images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
+                                                                              // files = await FilePicker.getFile();
+                                                                              // print('gila' + result.toString());
                                                                               setState(() {
+                                                                                // images = result;
                                                                                 file = 1;
-                                                                                print(files);
-                                                                                print(file);
+                                                                                // print(files);
+                                                                                print(images.path);
+                                                                                // print("gilaaaaa " + result.toString());
                                                                               });
                                                                               // _btnController
                                                                               //     .reset();
@@ -1420,12 +1433,12 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                             },
                                                                           ),
                                                                         ),
-                                                                        file == null
+                                                                        images == null
                                                                             ? Container()
                                                                             : Container(
                                                                                 padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
                                                                                 child: Image.file(
-                                                                                  files,
+                                                                                  File(widget.result.path),
                                                                                   width: 80,
                                                                                   height: 80,
                                                                                   fit: BoxFit.cover,

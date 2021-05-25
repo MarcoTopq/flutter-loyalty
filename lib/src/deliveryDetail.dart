@@ -710,7 +710,7 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                           _listDetaildo
                                                               .listDetailDo[
                                                                   index]
-                                                              .driver['name']
+                                                              .driver.name
                                                               .toString(),
                                                           style: new TextStyle(
                                                             fontSize: 16.0,
@@ -750,7 +750,7 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                           _listDetaildo
                                                               .listDetailDo[
                                                                   index]
-                                                              .driver['phone']
+                                                              .driver.phone
                                                               .toString(),
                                                           style: new TextStyle(
                                                             fontSize: 16.0,
@@ -805,7 +805,7 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                                 MaterialPageRoute(
                                                                     builder:
                                                                         (context) =>
-                                                                            Bast(
+                                                                            BastPage(
                                                                               url: _listDetaildo.listDetailDo[index].bast.toString(),
                                                                             )));
                                                           },

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:warnakaltim/src/agenHome.dart';
 import 'package:warnakaltim/src/chartAgen.dart';
 import 'package:warnakaltim/src/chartCustomer.dart';
+import 'package:warnakaltim/src/deliveryHistory.dart';
 import 'package:warnakaltim/src/homeDriver.dart';
 // import 'package:marquee_flutter/marquee_flutter.dart';
 import 'package:warnakaltim/src/login.dart';
@@ -47,6 +48,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:warnakaltim/src/talk.dart';
 import 'package:warnakaltim/src/userHome.dart';
 import 'package:warnakaltim/src/doApproveAgen.dart';
+
+import 'src/salesOrder.dart';
 
 // var urls = 'http://rpm.lensaborneo.id';
 var urls = 'https://ppnloyaltycard.com';
@@ -424,7 +427,19 @@ class _HomepageState extends State<Homepage>
     // }
     if (message['data']['screen'] == 'detaildo') {
       Navigator.push(
+          context, MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
+    }
+    if (message['data']['screen'] == 'detailapprove') {
+      Navigator.push(
           context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    }
+    if (message['data']['screen'] == 'detailaccept') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    }
+    if (message['data']['screen'] == 'detailso') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SalesOrderDetail()));
     }
     // Navigator.push(
     //     context, MaterialPageRoute(builder: (context) => DoApproveAgen()));

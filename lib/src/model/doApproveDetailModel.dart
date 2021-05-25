@@ -37,6 +37,16 @@ class DoApproveDetail {
     this.salesOrderId,
     this.driver,
     this.bast,
+    this.piece,
+    this.depot,
+    this.quantityText,
+    this.doDate,
+    this.detailAddress,
+    this.transportir,
+    this.distribution,
+    this.adminName,
+    this.knowing,
+    this.qrcode,
   });
 
   int id;
@@ -50,7 +60,7 @@ class DoApproveDetail {
   String noVehicles;
   int kmStart;
   String kmEnd;
-  String sgMeter;
+  dynamic sgMeter;
   String topSeal;
   String bottomSeal;
   String temperature;
@@ -61,8 +71,18 @@ class DoApproveDetail {
   dynamic departureTimeDepot;
   String status;
   int salesOrderId;
-  dynamic driver;
-  String bast;
+  Driver driver;
+  List<dynamic> bast;
+  String piece;
+  String depot;
+  String quantityText;
+  String doDate;
+  String detailAddress;
+  String transportir;
+  String distribution;
+  String adminName;
+  String knowing;
+  String qrcode;
 
   factory DoApproveDetail.fromJson(Map<String, dynamic> json) =>
       DoApproveDetail(
@@ -88,8 +108,18 @@ class DoApproveDetail {
         departureTimeDepot: json["departure_time_depot"],
         status: json["status"],
         salesOrderId: json["sales_order_id"],
-        driver: json["driver"],
-        bast: json["bast"],
+        driver: Driver.fromJson(json["driver"]),
+        bast: List<dynamic>.from(json["bast"].map((x) => x)),
+        piece: json["piece"],
+        depot: json["depot"],
+        quantityText: json["quantity_text"],
+        doDate: json["do_date"],
+        detailAddress: json["detail_address"],
+        transportir: json["transportir"],
+        distribution: json["distribution"],
+        adminName: json["admin_name"],
+        knowing: json["knowing"],
+        qrcode: json["qrcode"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -115,8 +145,70 @@ class DoApproveDetail {
         "departure_time_depot": departureTimeDepot,
         "status": status,
         "sales_order_id": salesOrderId,
-        "driver": driver,
-        "bast": bast,
+        "driver": driver.toJson(),
+        "bast": List<dynamic>.from(bast.map((x) => x)),
+        "piece": piece,
+        "depot": depot,
+        "quantity_text": quantityText,
+        "do_date": doDate,
+        "detail_address": detailAddress,
+        "transportir": transportir,
+        "distribution": distribution,
+        "admin_name": adminName,
+        "knowing": knowing,
+        "qrcode": qrcode,
+      };
+}
+
+class Driver {
+  Driver({
+    this.id,
+    this.name,
+    this.address,
+    this.phone,
+    this.avatar,
+    this.route,
+    this.userId,
+    this.agenId,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  int id;
+  String name;
+  String address;
+  String phone;
+  String avatar;
+  int route;
+  int userId;
+  int agenId;
+  String createdAt;
+  String updatedAt;
+
+  factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+        id: json["id"],
+        name: json["name"],
+        address: json["address"],
+        phone: json["phone"],
+        avatar: json["avatar"],
+        route: json["route"],
+        userId: json["user_id"],
+        agenId: json["agen_id"],
+        createdAt: json["created_at"],
+        updatedAt: json["updated_at"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "address": address,
+        "phone": phone,
+        "avatar": avatar,
+        "route": route,
+        "user_id": userId,
+        "agen_id": agenId,
+        "created_at": createdAt,
+        "updated_at": updatedAt,
       };
 }
 

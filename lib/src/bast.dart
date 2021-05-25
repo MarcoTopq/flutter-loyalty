@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
-class Bast extends StatefulWidget {
+class BastPage extends StatefulWidget {
   final String url;
-  Bast({
+  BastPage({
     Key key,
     this.url,
   }) : super(key: key);
   @override
-  _BastState createState() => _BastState();
+  _BastPageState createState() => _BastPageState();
 }
 
-class _BastState extends State<Bast> {
+class _BastPageState extends State<BastPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

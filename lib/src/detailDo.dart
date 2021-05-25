@@ -475,7 +475,7 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                     Navigator.push(
                                                                         context,
                                                                         MaterialPageRoute(
-                                                                            builder: (context) => Bast(
+                                                                            builder: (context) => BastPage(
                                                                                   url: delivery.bast.toString(),
                                                                                 )));
                                                                   },

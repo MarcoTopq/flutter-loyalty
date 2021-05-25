@@ -462,7 +462,7 @@ class _AllArrivalDetailState extends State<AllArrivalDetail> {
                                                                         Navigator.push(
                                                                             context,
                                                                             MaterialPageRoute(
-                                                                                builder: (context) => Bast(
+                                                                                builder: (context) => BastPage(
                                                                                       url: country.bast.toString(),
                                                                                     )));
                                                                       },
