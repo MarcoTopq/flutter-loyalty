@@ -795,7 +795,7 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                             _listDetaildo
                                                                 .listDetailDo[
                                                                     index]
-                                                                .bast
+                                                                .bast[0].bast
                                                                 .toString(),
                                                             width: 100,
                                                           ),
@@ -806,7 +806,7 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                                     builder:
                                                                         (context) =>
                                                                             BastPage(
-                                                                              url: _listDetaildo.listDetailDo[index].bast.toString(),
+                                                                              url: _listDetaildo.listDetailDo[index].bast[0].bast.toString(),
                                                                             )));
                                                           },
                                                         ),

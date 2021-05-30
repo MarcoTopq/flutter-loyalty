@@ -467,7 +467,7 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                           width: 50.0,
                                                                           child: delivery.bast.toString().length > 35
                                                                               ? Image.network(
-                                                                                  delivery.bast.toString(),
+                                                                                  delivery.bast[0]['bast'].toString(),
                                                                                   // width: 100,
                                                                                 )
                                                                               : Text('-'))),
@@ -476,7 +476,7 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                         context,
                                                                         MaterialPageRoute(
                                                                             builder: (context) => BastPage(
-                                                                                  url: delivery.bast.toString(),
+                                                                                  url: delivery.bast[0]['bast'].toString(),
                                                                                 )));
                                                                   },
                                                                 ),

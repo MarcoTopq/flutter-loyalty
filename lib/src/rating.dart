@@ -176,43 +176,44 @@ class _RatingState extends State<Rating> with SingleTickerProviderStateMixin {
                                         return 'Harap di isi';
                                       }
                                     }))),
-                        // RatingBar(
-                        //   initialRating: 3,
-                        //   itemCount: 5,
-                        //   itemBuilder: (context, index) {
-                        //     switch (index) {
-                        //       case 0:
-                        //         return Icon(
-                        //           Icons.sentiment_very_dissatisfied,
-                        //           color: Colors.red,
-                        //         );
-                        //       case 1:
-                        //         return Icon(
-                        //           Icons.sentiment_dissatisfied,
-                        //           color: Colors.redAccent,
-                        //         );
-                        //       case 2:
-                        //         return Icon(
-                        //           Icons.sentiment_neutral,
-                        //           color: Colors.amber,
-                        //         );
-                        //       case 3:
-                        //         return Icon(
-                        //           Icons.sentiment_satisfied,
-                        //           color: Colors.lightGreen,
-                        //         );
-                        //       case 4:
-                        //         return Icon(
-                        //           Icons.sentiment_very_satisfied,
-                        //           color: Colors.green,
-                        //         );
-                        //     }
-                        //   },
-                        //   onRatingUpdate: (star) {
-                        //     rating = star.toInt();
-                        //     print(rating);
-                        //   }, ratingWidget: null,
-                        // ),
+                        RatingBar.builder(
+                          initialRating: 3,
+                          itemCount: 5,
+                          // ignore: missing_return
+                          itemBuilder: (context, index) {
+                            switch (index) {
+                              case 0:
+                                return Icon(
+                                  Icons.sentiment_very_dissatisfied,
+                                  color: Colors.red,
+                                );
+                              case 1:
+                                return Icon(
+                                  Icons.sentiment_dissatisfied,
+                                  color: Colors.redAccent,
+                                );
+                              case 2:
+                                return Icon(
+                                  Icons.sentiment_neutral,
+                                  color: Colors.amber,
+                                );
+                              case 3:
+                                return Icon(
+                                  Icons.sentiment_satisfied,
+                                  color: Colors.lightGreen,
+                                );
+                              case 4:
+                                return Icon(
+                                  Icons.sentiment_very_satisfied,
+                                  color: Colors.green,
+                                );
+                            }
+                          },
+                          onRatingUpdate: (star) {
+                            rating = star.toInt();
+                            print(rating);
+                          },
+                        ),
                         Padding(
                             padding: EdgeInsets.all(20),
                             child: RoundedLoadingButton(

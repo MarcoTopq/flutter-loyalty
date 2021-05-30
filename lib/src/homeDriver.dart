@@ -1016,13 +1016,13 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                   SpringButtonType.OnlyScale,
                                                                                   roundedRectButton("Upload", signUpGradients, false),
                                                                                   onTapDown: (_) async {
-                                                                                    images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
-                                                                                    // files = await FilePicker.getFile();
+                                                                                    // images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
+                                                                                    files = await FilePicker.getFile();
                                                                                     // print(result);
                                                                                     setState(() {
                                                                                       // images = result;
                                                                                       file = 1;
-                                                                                      // print(files);
+                                                                                      print(files);
                                                                                       print(images);
                                                                                       // print("gilaaaaa " + result.toString());
 
@@ -1038,12 +1038,12 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                   },
                                                                                 ),
                                                                               ),
-                                                                              images == null
+                                                                              file == null
                                                                                   ? Container()
                                                                                   : Container(
                                                                                       padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
                                                                                       child: Image.file(
-                                                                                        File(widget.result.path),
+                                                                                       files,
                                                                                         width: 80,
                                                                                         height: 80,
                                                                                         fit: BoxFit.cover,
@@ -1413,14 +1413,14 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                                 false),
                                                                             onTapDown:
                                                                                 (_) async {
-                                                                             images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
-                                                                              // files = await FilePicker.getFile();
+                                                                            //  images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
+                                                                              files = await FilePicker.getFile();
                                                                               // print('gila' + result.toString());
                                                                               setState(() {
                                                                                 // images = result;
                                                                                 file = 1;
-                                                                                // print(files);
-                                                                                print(images.path);
+                                                                                print(files);
+                                                                                // print(images.path);
                                                                                 // print("gilaaaaa " + result.toString());
                                                                               });
                                                                               // _btnController
@@ -1433,12 +1433,12 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                             },
                                                                           ),
                                                                         ),
-                                                                        images == null
+                                                                        file == null
                                                                             ? Container()
                                                                             : Container(
                                                                                 padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
                                                                                 child: Image.file(
-                                                                                  File(widget.result.path),
+                                                                                  files,
                                                                                   width: 80,
                                                                                   height: 80,
                                                                                   fit: BoxFit.cover,
