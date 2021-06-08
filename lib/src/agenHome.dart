@@ -1024,7 +1024,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.start,
                                           children: <Widget>[
-                                            Text("Breaking News",
+                                            Text("Informasi Terbaru",
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 20)),
