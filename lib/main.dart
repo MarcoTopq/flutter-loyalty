@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -362,6 +363,9 @@ class _HomepageState extends State<Homepage>
       onMessage: (Map<String, dynamic> message) async {
         setState(() {
           print("onMessage: $message");
+          log("onMessage: $message['notification']");
+          print("onMessage:" +message['notification'].toString());
+
           // _showItemDialog(message);
           // Get.snackbar(
           //   message['title'],
@@ -394,7 +398,7 @@ class _HomepageState extends State<Homepage>
             message['notification']['title'],
             message['notification']['body'],
           );
-          // _navigateToItemDetail(message);
+          _navigateToItemDetail(message);
         });
       },
       onLaunch: (Map<String, dynamic> message) async {
@@ -425,6 +429,7 @@ class _HomepageState extends State<Homepage>
     // if (!item.route.isCurrent) {
     //   Navigator.push(context, item.route);
     // }
+    log(message['data']['screen']);
     if (message['data']['screen'] == 'detaildo') {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));

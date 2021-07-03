@@ -66,7 +66,7 @@ class DetailDo {
     String departureTime;
     String arrivalTime;
     dynamic unloadingStartTime;
-    DateTime unloadingEndTime;
+    String unloadingEndTime;
     dynamic departureTimeDepot;
     String status;
     int salesOrderId;
@@ -102,7 +102,7 @@ class DetailDo {
         departureTime: json["departure_time"],
         arrivalTime: json["arrival_time"],
         unloadingStartTime: json["unloading_start_time"],
-        unloadingEndTime: DateTime.parse(json["unloading_end_time"]),
+        unloadingEndTime: json["unloading_end_time"],
         departureTimeDepot: json["departure_time_depot"],
         status: json["status"],
         salesOrderId: json["sales_order_id"],
@@ -139,7 +139,7 @@ class DetailDo {
         "departure_time": departureTime,
         "arrival_time": arrivalTime,
         "unloading_start_time": unloadingStartTime,
-        "unloading_end_time": unloadingEndTime.toIso8601String(),
+        "unloading_end_time": unloadingEndTime,
         "departure_time_depot": departureTimeDepot,
         "status": status,
         "sales_order_id": salesOrderId,

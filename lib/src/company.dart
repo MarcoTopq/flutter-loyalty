@@ -1,4 +1,6 @@
 // import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:warnakaltim/main.dart';
@@ -26,7 +28,8 @@ class _CompanyDetailState extends State<CompanyDetail> {
   void initState() {
     // changePDF(2);
     super.initState();
-    loadDocument();
+    //  if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    // loadDocument();
   }
 
   loadDocument() async {
@@ -74,7 +77,10 @@ class _CompanyDetailState extends State<CompanyDetail> {
       ),
       backgroundColor: Colors.grey[850],
       body: WebviewScaffold(
-        url: widget.url,
+        url: 
+        widget.url,
+        withJavascript: true,
+        allowFileURLs: true,
       ),
       // Center(
       //   child: Center(
