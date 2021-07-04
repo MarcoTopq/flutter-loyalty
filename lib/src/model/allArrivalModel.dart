@@ -4,66 +4,90 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:warnakaltim/main.dart';
 
-List<AllArrival> allArrivalFromJson(String str) =>
-    List<AllArrival>.from(json.decode(str).map((x) => AllArrival.fromJson(x)));
+// To parse this JSON data, do
+//
+//     final allArrival = allArrivalFromJson(jsonString);
 
-String allArrivalToJson(List<AllArrival> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+import 'dart:convert';
+
+List<AllArrival> allArrivalFromJson(String str) => List<AllArrival>.from(json.decode(str).map((x) => AllArrival.fromJson(x)));
+
+String allArrivalToJson(List<AllArrival> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class AllArrival {
-  AllArrival({
-    this.id,
-    this.deliveryOrderNumber,
-    this.effectiveDateStart,
-    this.effectiveDateEnd,
-    this.product,
-    this.quantity,
-    this.shippedWith,
-    this.shippedVia,
-    this.noVehicles,
-    this.kmStart,
-    this.kmEnd,
-    this.sgMeter,
-    this.topSeal,
-    this.bottomSeal,
-    this.temperature,
-    this.departureTime,
-    this.arrivalTime,
-    this.unloadingStartTime,
-    this.unloadingEndTime,
-    this.departureTimeDepot,
-    this.status,
-    this.salesOrderId,
-    this.driver,
-    this.bast,
-  });
+    AllArrival({
+        this.id,
+        this.deliveryOrderNumber,
+        this.effectiveDateStart,
+        this.effectiveDateEnd,
+        this.product,
+        this.quantity,
+        this.shippedWith,
+        this.shippedVia,
+        this.noVehicles,
+        this.kmStart,
+        this.kmEnd,
+        this.sgMeter,
+        this.topSeal,
+        this.bottomSeal,
+        this.temperature,
+        this.departureTime,
+        this.arrivalTime,
+        this.unloadingStartTime,
+        this.unloadingEndTime,
+        this.departureTimeDepot,
+        this.status,
+        this.salesOrderId,
+        this.driver,
+        this.bast,
+        this.piece,
+        this.depot,
+        this.quantityText,
+        this.doDate,
+        this.detailAddress,
+        this.transportir,
+        this.distribution,
+        this.adminName,
+        this.knowing,
+        this.qrcode,
+    });
 
-  int id;
-  String deliveryOrderNumber;
-  String effectiveDateStart;
-  String effectiveDateEnd;
-  String product;
-  int quantity;
-  String shippedWith;
-  String shippedVia;
-  String noVehicles;
-  int kmStart;
-  String kmEnd;
-  String sgMeter;
-  String topSeal;
-  String bottomSeal;
-  String temperature;
-  String departureTime;
-  String arrivalTime;
-  dynamic unloadingStartTime;
-  DateTime unloadingEndTime;
-  dynamic departureTimeDepot;
-  String status;
-  int salesOrderId;
-  Driver driver;
-  String bast;
+    int id;
+    String deliveryOrderNumber;
+    String effectiveDateStart;
+    String effectiveDateEnd;
+    String product;
+    int quantity;
+    String shippedWith;
+    String shippedVia;
+    String noVehicles;
+    int kmStart;
+    String kmEnd;
+    String sgMeter;
+    String topSeal;
+    String bottomSeal;
+    String temperature;
+    String departureTime;
+    String arrivalTime;
+    dynamic unloadingStartTime;
+    DateTime unloadingEndTime;
+    dynamic departureTimeDepot;
+    String status;
+    int salesOrderId;
+    Driver driver;
+    List<Bast> bast;
+    String piece;
+    String depot;
+    String quantityText;
+    String doDate;
+    String detailAddress;
+    String transportir;
+    String distribution;
+    String adminName;
+    String knowing;
+    String qrcode;
 
-  factory AllArrival.fromJson(Map<String, dynamic> json) => AllArrival(
+    factory AllArrival.fromJson(Map<String, dynamic> json) => AllArrival(
         id: json["id"],
         deliveryOrderNumber: json["delivery_order_number"],
         effectiveDateStart: json["effective_date_start"],
@@ -75,7 +99,7 @@ class AllArrival {
         noVehicles: json["no_vehicles"],
         kmStart: json["km_start"],
         kmEnd: json["km_end"],
-        sgMeter: json["sg_meter"],
+        sgMeter: json["sg_meter"] == null ? null : json["sg_meter"],
         topSeal: json["top_seal"],
         bottomSeal: json["bottom_seal"],
         temperature: json["temperature"],
@@ -87,10 +111,20 @@ class AllArrival {
         status: json["status"],
         salesOrderId: json["sales_order_id"],
         driver: Driver.fromJson(json["driver"]),
-        bast: json["bast"],
-      );
+        bast: List<Bast>.from(json["bast"].map((x) => Bast.fromJson(x))),
+        piece: json["piece"],
+        depot: json["depot"],
+        quantityText: json["quantity_text"],
+        doDate: json["do_date"],
+        detailAddress: json["detail_address"],
+        transportir: json["transportir"] == null ? null : json["transportir"],
+        distribution: json["distribution"],
+        adminName: json["admin_name"],
+        knowing: json["knowing"],
+        qrcode: json["qrcode"],
+    );
 
-  Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toJson() => {
         "id": id,
         "delivery_order_number": deliveryOrderNumber,
         "effective_date_start": effectiveDateStart,
@@ -102,7 +136,7 @@ class AllArrival {
         "no_vehicles": noVehicles,
         "km_start": kmStart,
         "km_end": kmEnd,
-        "sg_meter": sgMeter,
+        "sg_meter": sgMeter == null ? null : sgMeter,
         "top_seal": topSeal,
         "bottom_seal": bottomSeal,
         "temperature": temperature,
@@ -114,36 +148,78 @@ class AllArrival {
         "status": status,
         "sales_order_id": salesOrderId,
         "driver": driver.toJson(),
+        "bast": List<dynamic>.from(bast.map((x) => x.toJson())),
+        "piece": piece,
+        "depot": depot,
+        "quantity_text": quantityText,
+        "do_date": doDate,
+        "detail_address": detailAddress,
+        "transportir": transportir == null ? null : transportir,
+        "distribution": distribution,
+        "admin_name": adminName,
+        "knowing": knowing,
+        "qrcode": qrcode,
+    };
+}
+
+class Bast {
+    Bast({
+        this.id,
+        this.deliveryOrderId,
+        this.bast,
+        this.createdAt,
+        this.updatedAt,
+    });
+
+    int id;
+    int deliveryOrderId;
+    String bast;
+    String createdAt;
+    String updatedAt;
+
+    factory Bast.fromJson(Map<String, dynamic> json) => Bast(
+        id: json["id"],
+        deliveryOrderId: json["delivery_order_id"],
+        bast: json["bast"],
+        createdAt: json["created_at"],
+        updatedAt: json["updated_at"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "delivery_order_id": deliveryOrderId,
         "bast": bast,
-      };
+        "created_at": createdAt,
+        "updated_at": updatedAt,
+    };
 }
 
 class Driver {
-  Driver({
-    this.id,
-    this.name,
-    this.address,
-    this.phone,
-    this.avatar,
-    this.route,
-    this.userId,
-    this.agenId,
-    this.createdAt,
-    this.updatedAt,
-  });
+    Driver({
+        this.id,
+        this.name,
+        this.address,
+        this.phone,
+        this.avatar,
+        this.route,
+        this.userId,
+        this.agenId,
+        this.createdAt,
+        this.updatedAt,
+    });
 
-  int id;
-  String name;
-  String address;
-  String phone;
-  String avatar;
-  int route;
-  int userId;
-  int agenId;
-  String createdAt;
-  String updatedAt;
+    int id;
+    String name;
+    String address;
+    String phone;
+    String avatar;
+    int route;
+    int userId;
+    int agenId;
+    String createdAt;
+    String updatedAt;
 
-  factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+    factory Driver.fromJson(Map<String, dynamic> json) => Driver(
         id: json["id"],
         name: json["name"],
         address: json["address"],
@@ -154,9 +230,9 @@ class Driver {
         agenId: json["agen_id"],
         createdAt: json["created_at"],
         updatedAt: json["updated_at"],
-      );
+    );
 
-  Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
         "address": address,
@@ -167,7 +243,7 @@ class Driver {
         "agen_id": agenId,
         "created_at": createdAt,
         "updated_at": updatedAt,
-      };
+    };
 }
 
 class ArrivalModel with ChangeNotifier {
