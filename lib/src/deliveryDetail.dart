@@ -583,33 +583,33 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                   Padding(
                                                       padding:
                                                           EdgeInsets.all(2)),
-                                                  Text(
-                                                    'Jam Mulai Pembongkaran',
-                                                    style: new TextStyle(
-                                                      fontSize: 12.0,
-                                                      color: gold,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    _listDetaildo
-                                                        .listDetailDo[index]
-                                                        .unloadingStartTime
-                                                        .toString(),
-                                                    style: new TextStyle(
-                                                      fontSize: 16.0,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  Divider(
-                                                    endIndent: 0.0,
-                                                    indent: 0.0,
-                                                    height: 1.0,
-                                                    thickness: 1,
-                                                    color: Colors.white,
-                                                  ),
-                                                  Padding(
-                                                      padding:
-                                                          EdgeInsets.all(2)),
+                                                  // Text(
+                                                  //   'Jam Mulai Pembongkaran',
+                                                  //   style: new TextStyle(
+                                                  //     fontSize: 12.0,
+                                                  //     color: gold,
+                                                  //   ),
+                                                  // ),
+                                                  // Text(
+                                                  //   _listDetaildo
+                                                  //       .listDetailDo[index]
+                                                  //       .unloadingStartTime
+                                                  //       .toString(),
+                                                  //   style: new TextStyle(
+                                                  //     fontSize: 16.0,
+                                                  //     color: Colors.white,
+                                                  //   ),
+                                                  // ),
+                                                  // Divider(
+                                                  //   endIndent: 0.0,
+                                                  //   indent: 0.0,
+                                                  //   height: 1.0,
+                                                  //   thickness: 1,
+                                                  //   color: Colors.white,
+                                                  // ),
+                                                  // Padding(
+                                                  //     padding:
+                                                  //         EdgeInsets.all(2)),
                                                   Text(
                                                     'Jam Selesai Pembongkaran',
                                                     style: new TextStyle(
@@ -630,33 +630,33 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                   Padding(
                                                       padding:
                                                           EdgeInsets.all(2)),
-                                                  Text(
-                                                    'Jam Tiba di Depo',
-                                                    style: new TextStyle(
-                                                      fontSize: 12.0,
-                                                      color: gold,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    _listDetaildo
-                                                        .listDetailDo[index]
-                                                        .departureTimeDepot
-                                                        .toString(),
-                                                    style: new TextStyle(
-                                                      fontSize: 16.0,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  Divider(
-                                                    endIndent: 0.0,
-                                                    indent: 0.0,
-                                                    height: 1.0,
-                                                    thickness: 1,
-                                                    color: Colors.white,
-                                                  ),
-                                                  Padding(
-                                                      padding:
-                                                          EdgeInsets.all(2)),
+                                                  // Text(
+                                                  //   'Jam Tiba di Depo',
+                                                  //   style: new TextStyle(
+                                                  //     fontSize: 12.0,
+                                                  //     color: gold,
+                                                  //   ),
+                                                  // ),
+                                                  // Text(
+                                                  //   _listDetaildo
+                                                  //       .listDetailDo[index]
+                                                  //       .departureTimeDepot
+                                                  //       .toString(),
+                                                  //   style: new TextStyle(
+                                                  //     fontSize: 16.0,
+                                                  //     color: Colors.white,
+                                                  //   ),
+                                                  // ),
+                                                  // Divider(
+                                                  //   endIndent: 0.0,
+                                                  //   indent: 0.0,
+                                                  //   height: 1.0,
+                                                  //   thickness: 1,
+                                                  //   color: Colors.white,
+                                                  // ),
+                                                  // Padding(
+                                                  //     padding:
+                                                  //         EdgeInsets.all(2)),
                                                   Text(
                                                     'Status',
                                                     style: new TextStyle(
@@ -774,20 +774,20 @@ class _DetailDeliveryState extends State<DetailDelivery>
                                                       color: gold,
                                                     ),
                                                   ),
-                                                  // _listDetaildo
-                                                  //             .listDetailDo[
-                                                  //                 index]
-                                                  //             .bast
-                                                  //             .toString() ==
-                                                  //         "http://rpm.lensaborneo.id/uploads"
-                                                  //     ? Text(
-                                                  //         ' - ',
-                                                  //         style: new TextStyle(
-                                                  //           fontSize: 16.0,
-                                                  //           color: Colors.white,
-                                                  //         ),
-                                                  //       )
-                                                  //     : 
+                                                   _listDetaildo
+                                                                .listDetailDo[
+                                                                    index]
+                                                                .bast.length < 1
+                                                              
+                                                      ? 
+                                                  Text(
+                                                           ' - ' ,
+                                                          style: new TextStyle(
+                                                            fontSize: 16.0,
+                                                            color: Colors.white,
+                                                          ),
+                                                        )
+                                                      : 
                                                   InkWell(
                                                           child: Image.network(
                                                             // "http://rpm.lensaborneo.id/uploads/avatars/default.jpg",

@@ -270,10 +270,14 @@ class _DeliveryHistoryDetailState extends State<DeliveryHistoryDetail> {
                                                         _listDelivery
                                                                     .listDeliveryHistory[
                                                                         index]
-                                                                    .arrivalTime ==
-                                                                null
+                                                                    .status !=
+                                                                "Telah Dikirim"   
                                                             ? Container()
-                                                            : Container(
+                                                            :  _listDelivery
+                                                                    .listDeliveryHistory[
+                                                                        index]
+                                                                    .status ==
+                                                                "Telah Dirating" ?Container(): Container(
                                                                 width: 120,
                                                                 height: 60,
                                                                 child: SpringButton(

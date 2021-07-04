@@ -161,6 +161,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
       return Future.value(hasil);
     }
 
+    // ignore: missing_return
     Future<http.Response> kirimdata(File file, String id) async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String token = prefs.get('Token');
@@ -176,20 +177,36 @@ class _DriverHomeState extends State<DriverHomeDetail> {
           lookupMimeType(file.path, headerBytes: [0xFF, 0xD8]).split('/');
       var request =
           http.MultipartRequest("POST", Uri.parse(urls + "/api/driver/finish"))
+            ..fields['delivery_order_id'] = id;
+      var requestbast =
+          http.MultipartRequest("POST", Uri.parse(urls + "/api/driver/upload/bast"))
             ..fields['delivery_order_id'] = id
             ..files.add(await http.MultipartFile.fromPath('bast', file.path,
                 contentType: MediaType(mimeTypeData[0], mimeTypeData[1])));
       request.headers.addAll(headers);
+      requestbast.headers.addAll(headers);
+
       print(request.files);
       print(request.fields);
       // request.files.add(files);
       var response = await request.send();
+      var response2 = await requestbast.send();
+      
       var res;
+      var res2;
+
       print('Upload FIle berhasil ' + response.statusCode.toString());
       await response.stream
           .transform(utf8.decoder)
           .listen((value) => setState(() {
                     res = value.toString();
+                  })
+              // print(value);
+              );
+       await response2.stream
+          .transform(utf8.decoder)
+          .listen((value) => setState(() {
+                    res2 = value.toString();
                   })
               // print(value);
               );
