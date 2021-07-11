@@ -453,18 +453,22 @@ class _AllArrivalDetailState extends State<AllArrivalDetail> {
                                                                           child: Container(
                                                                               padding: EdgeInsets.only(left: 25),
                                                                               width: 100.0,
-                                                                              child: Image.network(
-                                                                                country.bast.toString(),
-                                                                                // width: 100,
-                                                                              ))),
+                                                                              child: country.bast.length > 1
+                                                                                  ? Image.network(country.bast[0].bast.toString()
+                                                                                      // width: 100,
+                                                                                      )
+                                                                                  : Text(" - "))),
                                                                       onTap:
                                                                           () {
-                                                                        Navigator.push(
-                                                                            context,
-                                                                            MaterialPageRoute(
-                                                                                builder: (context) => BastPage(
-                                                                                      url: country.bast.toString(),
-                                                                                    )));
+                                                                        country.bast.length >
+                                                                                1
+                                                                            ? Navigator.push(
+                                                                                context,
+                                                                                MaterialPageRoute(
+                                                                                    builder: (context) => BastPage(
+                                                                                          url: country.bast[0].bast.toString(),
+                                                                                        )))
+                                                                            : Container();
                                                                       },
                                                                     ),
                                                                     // DataCell(
