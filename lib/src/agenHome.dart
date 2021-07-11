@@ -62,6 +62,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
   @override
   void initState() {
     super.initState();
+    print("badges : ---- $badges");
     // _getToken();
     // WidgetsBinding.instance.addObserver(this);
   }
@@ -277,7 +278,7 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                                     pdf = _listNews
                                         .listHomeDetail[0].company.profile
                                         .toString();
-                                    print('pdfnya'+pdf);
+                                    print('pdfnya' + pdf);
                                     return email != null
                                         ? Container()
                                         : Container(
@@ -590,10 +591,13 @@ class _AgenHomeState extends State<AgenHomeDetail> {
                               SliverList(
                                 delegate: SliverChildBuilderDelegate(
                                   (BuildContext context, int index) {
-                                    if (badges == 0) {
-                                      _incrementCounter(_listNews
-                                          .listHomeDetail[0].totalNotifDo);
-                                    }
+                                    // if (badges == 0) {
+
+                                    badges = 0;
+                                    _incrementCounter(_listNews
+                                        .listHomeDetail[0].totalNotifDo);
+
+                                    // }
                                     // badges = _listNews
                                     //     .listHomeDetail[0].totalNotifDo;
                                     return email == null

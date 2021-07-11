@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
@@ -70,12 +71,24 @@ class _DriverHomeState extends State<DriverHomeDetail> {
   var file;
   var data;
   var prf;
-
+  bool _isLoading = false;
   Future<void> _getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       prf = prefs;
       data = prefs.get('Idnya');
+    });
+  }
+
+  _onLoading() {
+    setState(() {
+      _isLoading = true;
+    });
+  }
+
+  _offLoading() {
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -178,11 +191,11 @@ class _DriverHomeState extends State<DriverHomeDetail> {
       var request =
           http.MultipartRequest("POST", Uri.parse(urls + "/api/driver/finish"))
             ..fields['delivery_order_id'] = id;
-      var requestbast =
-          http.MultipartRequest("POST", Uri.parse(urls + "/api/driver/upload/bast"))
-            ..fields['delivery_order_id'] = id
-            ..files.add(await http.MultipartFile.fromPath('bast', file.path,
-                contentType: MediaType(mimeTypeData[0], mimeTypeData[1])));
+      var requestbast = http.MultipartRequest(
+          "POST", Uri.parse(urls + "/api/driver/upload/bast"))
+        ..fields['delivery_order_id'] = id
+        ..files.add(await http.MultipartFile.fromPath('bast', file.path,
+            contentType: MediaType(mimeTypeData[0], mimeTypeData[1])));
       request.headers.addAll(headers);
       requestbast.headers.addAll(headers);
 
@@ -191,7 +204,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
       // request.files.add(files);
       var response = await request.send();
       var response2 = await requestbast.send();
-      
+
       var res;
       var res2;
 
@@ -203,7 +216,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                   })
               // print(value);
               );
-       await response2.stream
+      await response2.stream
           .transform(utf8.decoder)
           .listen((value) => setState(() {
                     res2 = value.toString();
@@ -235,6 +248,14 @@ class _DriverHomeState extends State<DriverHomeDetail> {
             duration: 10, gravity: Toast.BOTTOM);
       }
       // return Future<http.Response>(response.headers);
+    }
+
+    _sendData(File file, String id) async {
+      _onLoading();
+      try {
+        await kirimdata(file, id);
+        _offLoading();
+      } catch (e) {}
     }
 
     Future<void> _showMyDialog(
@@ -369,7 +390,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                   SharedPreferences prefs =
                       await SharedPreferences.getInstance();
                   var idDO = prefs.get('Idnya');
-
+                  _onLoading();
                   await kirimdata(files, idDO == null ? idnya : idDO)
                       .then((value) async {
                     prefs.remove('Idnya');
@@ -389,6 +410,7 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                       print('hahahahahaahah');
                       final responseJson = json.decode(value.body);
                     } else {
+                      _offLoading();
                       return AlertDialog(
                         title: new Text("Penukaran Promo "
                             "Gagal !!!"),
@@ -427,6 +449,8 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                       await showDialog(
                           context: context,
                           builder: (BuildContext context) {
+                            _offLoading();
+
                             return AlertDialog(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -570,1193 +594,1320 @@ class _DriverHomeState extends State<DriverHomeDetail> {
       key: _driverKey,
       backgroundColor: Colors.grey[850],
       // appBar: AppBar(title: Text('WARNA KALTIM')),
-      body: RefreshIndicator(
-          onRefresh: () => _refreshData(context),
-          child: FutureBuilder(
-              future: Provider.of<DriverHomeModel>(context, listen: false)
-                  .fetchDataDriverHome(),
-              builder: (ctx, snapshop) {
-                if (snapshop.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  if (snapshop.error != null) {
-                    return Center(
-                      child: Text("Error Loading Data"),
-                    );
-                  }
-                  return Consumer<DriverHomeModel>(
-                      builder: (ctx, _listNews, child) => Center(
-                              child: CustomScrollView(
-                            slivers: <Widget>[
-                              SliverAppBar(
-                                iconTheme: IconThemeData(
-                                  color: Colors.white, //change your color here
-                                ),
-                                backgroundColor: Colors.black,
-                                floating: false,
-                                pinned: true,
-                                expandedHeight:
-                                    MediaQuery.of(context).size.width / 20,
-                                leading: email == null
-                                    ? null
-                                    : new IconButton(
-                                        icon: new Icon(Icons.menu, color: gold),
-                                        onPressed: () {
-                                          _driverKey.currentState.openDrawer();
-                                        }),
-                                flexibleSpace: FlexibleSpaceBar(
-                                  // centerTitle: true,
-                                  title: Row(
-                                    crossAxisAlignment: email == null
-                                        ? CrossAxisAlignment.start
-                                        : CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Padding(
-                                          padding: EdgeInsets.only(
-                                              top: MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  100)),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+      body: LoadingOverlay(
+          isLoading: _isLoading,
+          // demo of some additional parameters
+          opacity: 0.5,
+          progressIndicator: CircularProgressIndicator(),
+          child: RefreshIndicator(
+              onRefresh: () => _refreshData(context),
+              child: FutureBuilder(
+                  future: Provider.of<DriverHomeModel>(context, listen: false)
+                      .fetchDataDriverHome(),
+                  builder: (ctx, snapshop) {
+                    if (snapshop.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else {
+                      if (snapshop.error != null) {
+                        return Center(
+                          child: Text("Error Loading Data"),
+                        );
+                      }
+                      return Consumer<DriverHomeModel>(
+                          builder: (ctx, _listNews, child) => Center(
+                                  child: CustomScrollView(
+                                slivers: <Widget>[
+                                  SliverAppBar(
+                                    iconTheme: IconThemeData(
+                                      color:
+                                          Colors.white, //change your color here
+                                    ),
+                                    backgroundColor: Colors.black,
+                                    floating: false,
+                                    pinned: true,
+                                    expandedHeight:
+                                        MediaQuery.of(context).size.width / 20,
+                                    leading: email == null
+                                        ? null
+                                        : new IconButton(
+                                            icon: new Icon(Icons.menu,
+                                                color: gold),
+                                            onPressed: () {
+                                              _driverKey.currentState
+                                                  .openDrawer();
+                                            }),
+                                    flexibleSpace: FlexibleSpaceBar(
+                                      // centerTitle: true,
+                                      title: Row(
+                                        crossAxisAlignment: email == null
+                                            ? CrossAxisAlignment.start
+                                            : CrossAxisAlignment.start,
                                         mainAxisAlignment:
-                                            MainAxisAlignment.end,
+                                            MainAxisAlignment.start,
                                         children: <Widget>[
-                                          Image.asset(
-                                            'assets/patra.jpg',
-                                            // Expanded(
-                                            //     child: Container(
-                                            //         // width: 100,
-                                            //         child: Image.network(
-                                            //   _listNews
-                                            //       .listHomeDetail[0].company.,
-                                            fit: BoxFit.fill,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                4,
-                                            // height: MediaQuery.of(context).size.height / 200,
+                                          Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: MediaQuery.of(context)
+                                                          .size
+                                                          .height /
+                                                      100)),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: <Widget>[
+                                              Image.asset(
+                                                'assets/patra.jpg',
+                                                // Expanded(
+                                                //     child: Container(
+                                                //         // width: 100,
+                                                //         child: Image.network(
+                                                //   _listNews
+                                                //       .listHomeDetail[0].company.,
+                                                fit: BoxFit.fill,
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    4,
+                                                // height: MediaQuery.of(context).size.height / 200,
+                                              ),
+                                            ],
                                           ),
+                                          Padding(
+                                              padding: EdgeInsets.all(
+                                                  MediaQuery.of(context)
+                                                          .size
+                                                          .width /
+                                                      10)),
+                                          Expanded(
+                                              child: email == null
+                                                  ? Padding(
+                                                      padding:
+                                                          EdgeInsets.all(10),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: <Widget>[
+                                                          InkWell(
+                                                              onTap: () async {
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                Login()));
+                                                              },
+                                                              child: Icon(
+                                                                Icons
+                                                                    .account_circle,
+                                                                color: gold,
+                                                                size: 35,
+                                                              ))
+                                                        ],
+                                                      ))
+                                                  : Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: <Widget>[
+                                                        Text('Driver',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 15)),
+                                                        Text(
+                                                            'Reward Point Management ',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 10)),
+                                                      ],
+                                                    ))
                                         ],
                                       ),
-                                      Padding(
-                                          padding: EdgeInsets.all(
-                                              MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  10)),
-                                      Expanded(
-                                          child: email == null
-                                              ? Padding(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: <Widget>[
-                                                      InkWell(
-                                                          onTap: () async {
-                                                            Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            Login()));
-                                                          },
-                                                          child: Icon(
-                                                            Icons
-                                                                .account_circle,
-                                                            color: gold,
-                                                            size: 35,
-                                                          ))
-                                                    ],
-                                                  ))
-                                              : Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  children: <Widget>[
-                                                    Text('Driver',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 15)),
-                                                    Text(
-                                                        'Reward Point Management ',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 10)),
-                                                  ],
-                                                ))
-                                    ],
-                                  ),
-                                  titlePadding: EdgeInsets.fromLTRB(
-                                      MediaQuery.of(context).size.width / 8,
-                                      0.0,
-                                      MediaQuery.of(context).size.width / 100,
-                                      MediaQuery.of(context).size.width / 100),
-                                  background: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        top: BorderSide(
-                                          color: gold,
-                                          width: 1.0,
+                                      titlePadding: EdgeInsets.fromLTRB(
+                                          MediaQuery.of(context).size.width / 8,
+                                          0.0,
+                                          MediaQuery.of(context).size.width /
+                                              100,
+                                          MediaQuery.of(context).size.width /
+                                              100),
+                                      background: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            top: BorderSide(
+                                              color: gold,
+                                              width: 1.0,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (BuildContext context, int index) {
-                                    return email == null
-                                        ? Container()
-                                        : Container(
-                                            // color: Colors.black12,
-                                            padding: EdgeInsets.all(10),
-                                            width: c_width,
-                                            height: 100,
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                Padding(
-                                                    padding: EdgeInsets.only(
-                                                        top: 15)),
-                                                Container(
-                                                  // padding: EdgeInsets.all(),
-                                                  child: Marquee(
-                                                      direction:
-                                                          Axis.horizontal,
-                                                      textDirection:
-                                                          TextDirection.rtl,
-                                                      animationDuration:
-                                                          Duration(seconds: 3),
-                                                      backDuration: Duration(
-                                                          milliseconds: 3000),
-                                                      pauseDuration: Duration(
-                                                          milliseconds: 100),
-                                                      // directionMarguee:
-                                                      //     DirectionMarguee.oneDirection,
-                                                      child: Text(
-                                                        "Welcome to PT Pertamina Patra Niaga Loyalty Card",
-                                                        style: TextStyle(
-                                                            fontSize: 15,
-                                                            color: gold,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      )),
-                                                ),
-                                                Padding(
-                                                    padding: EdgeInsets.only(
-                                                        top: 10)),
-                                              ],
-                                            ));
-                                  },
-                                  childCount: 1,
-                                ),
-                              ),
-                              data == null
-                                  ? SliverToBoxAdapter(
-                                      child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        width: a_width,
-                                        height: a_height,
-                                        child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: posisi == null
-                                              ? _listNews.listHomeDetail[0].user
-                                                  .readyDeliveryOrder.length
-                                              : 1,
-                                          // _listNews.listHomeDetail[0].hot.length,
-                                          itemBuilder: (context, index) {
-                                            return Container(
+                                  SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (BuildContext context, int index) {
+                                        return email == null
+                                            ? Container()
+                                            : Container(
+                                                // color: Colors.black12,
                                                 padding: EdgeInsets.all(10),
-                                                // width: a_width,
-                                                // height: a_height,
-                                                child: InkWell(
-                                                    onTap: () {},
-                                                    child: Card(
-                                                        color: Colors.grey[700],
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          side: BorderSide(
-                                                            color: gold,
-                                                            width: 2.0,
-                                                          ),
-                                                        ),
-                                                        child: Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    15),
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Row(
+                                                width: c_width,
+                                                height: 100,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 15)),
+                                                    Container(
+                                                      // padding: EdgeInsets.all(),
+                                                      child: Marquee(
+                                                          direction:
+                                                              Axis.horizontal,
+                                                          textDirection:
+                                                              TextDirection.rtl,
+                                                          animationDuration:
+                                                              Duration(
+                                                                  seconds: 3),
+                                                          backDuration:
+                                                              Duration(
+                                                                  milliseconds:
+                                                                      3000),
+                                                          pauseDuration:
+                                                              Duration(
+                                                                  milliseconds:
+                                                                      100),
+                                                          // directionMarguee:
+                                                          //     DirectionMarguee.oneDirection,
+                                                          child: Text(
+                                                            "Welcome to PT Pertamina Patra Niaga Loyalty Card",
+                                                            style: TextStyle(
+                                                                fontSize: 15,
+                                                                color: gold,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          )),
+                                                    ),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                top: 10)),
+                                                  ],
+                                                ));
+                                      },
+                                      childCount: 1,
+                                    ),
+                                  ),
+                                  data == null
+                                      ? SliverToBoxAdapter(
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            width: a_width,
+                                            height: a_height,
+                                            child: ListView.builder(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: posisi == null
+                                                  ? _listNews
+                                                      .listHomeDetail[0]
+                                                      .user
+                                                      .readyDeliveryOrder
+                                                      .length
+                                                  : 1,
+                                              // _listNews.listHomeDetail[0].hot.length,
+                                              itemBuilder: (context, index) {
+                                                return Container(
+                                                    padding: EdgeInsets.all(10),
+                                                    // width: a_width,
+                                                    // height: a_height,
+                                                    child: InkWell(
+                                                        onTap: () {},
+                                                        child: Card(
+                                                            color: Colors
+                                                                .grey[700],
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              side: BorderSide(
+                                                                color: gold,
+                                                                width: 2.0,
+                                                              ),
+                                                            ),
+                                                            child: Container(
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .all(
+                                                                            15),
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
                                                                   children: [
-                                                                    Icon(
-                                                                        Icons
-                                                                            .warning,
-                                                                        color: Colors
-                                                                            .yellow,
-                                                                        size:
-                                                                            20),
+                                                                    Row(
+                                                                      children: [
+                                                                        Icon(
+                                                                            Icons
+                                                                                .warning,
+                                                                            color:
+                                                                                Colors.yellow,
+                                                                            size: 20),
+                                                                        Text(
+                                                                            'Tunjukan Notifikasi ini ke Layanan Jual PPN',
+                                                                            style: TextStyle(
+                                                                                color: Colors.white,
+                                                                                fontSize: 15,
+                                                                                fontWeight: FontWeight.bold))
+                                                                      ],
+                                                                    ),
+                                                                    Padding(
+                                                                        padding:
+                                                                            EdgeInsets.all(5)),
                                                                     Text(
-                                                                        'Tunjukan Notifikasi ini ke Layanan Jual PPN',
+                                                                        'No DO : ' +
+                                                                            _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].deliveryOrderNumber
+                                                                                .toString(),
                                                                         style: TextStyle(
                                                                             color: Colors
                                                                                 .white,
                                                                             fontSize:
                                                                                 15,
                                                                             fontWeight:
-                                                                                FontWeight.bold))
-                                                                  ],
-                                                                ),
-                                                                Padding(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            5)),
-                                                                Text(
-                                                                    'No DO : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .deliveryOrderNumber
-                                                                            .toString(),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'No SO : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .salesOrderId
-                                                                            .toString(),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'No Kendaraan : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .noVehicles,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Estimasi Berangkat : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .effectiveDateStart,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Estimasi Tiba : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .effectiveDateEnd,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Produk : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .product,
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Kwantitas : ' +
-                                                                        _listNews
-                                                                            .listHomeDetail[
-                                                                                0]
-                                                                            .user
-                                                                            .readyDeliveryOrder[posisi == null
-                                                                                ? index
-                                                                                : posisi]
-                                                                            .quantity
-                                                                            .toString(),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Container(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            10),
-                                                                    width: 150,
-                                                                    height: 150,
-                                                                    child:
-                                                                        InkWell(
-                                                                      onTap:
-                                                                          () {
-                                                                        Navigator
-                                                                            .push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                              builder: (context) => Qrcode(url: _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].qrcode)),
-                                                                        );
-                                                                      },
-                                                                      child: SvgPicture.network(_listNews
-                                                                          .listHomeDetail[
-                                                                              0]
-                                                                          .user
-                                                                          .readyDeliveryOrder[posisi == null
-                                                                              ? index
-                                                                              : posisi]
-                                                                          .qrcode),
-                                                                    )),
-                                                                Padding(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            10)),
-                                                                Row(
-                                                                  children: [
-                                                                    Icon(
-                                                                        Icons
-                                                                            .warning,
-                                                                        color: Colors
-                                                                            .yellow,
-                                                                        size:
-                                                                            15),
+                                                                                FontWeight.bold)),
                                                                     Text(
-                                                                        'JANGAN DI ACCEPT SEBELUM ANDA SELESAI MELAKUKAN PENGISIAN BBM.',
+                                                                        'No SO : ' +
+                                                                            _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].salesOrderId
+                                                                                .toString(),
                                                                         style: TextStyle(
                                                                             color: Colors
-                                                                                .red,
+                                                                                .white,
                                                                             fontSize:
-                                                                                12,
+                                                                                15,
                                                                             fontWeight:
-                                                                                FontWeight.bold))
-                                                                  ],
-                                                                ),
-                                                                Padding(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            2)),
-                                                                Row(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .center,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceEvenly,
-                                                                  children: [
-                                                                    posisi ==
-                                                                            null
-                                                                        ? Container()
-                                                                        : Row(
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.start,
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.spaceEvenly,
-                                                                            children: [
-                                                                              Container(
-                                                                                width: 120,
-                                                                                height: 60,
-                                                                                child: SpringButton(
-                                                                                  SpringButtonType.OnlyScale,
-                                                                                  roundedRectButton("Upload", signUpGradients, false),
-                                                                                  onTapDown: (_) async {
-                                                                                    // images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
-                                                                                    files = await FilePicker.getFile();
-                                                                                    // print(result);
-                                                                                    setState(() {
-                                                                                      // images = result;
-                                                                                      file = 1;
-                                                                                      print(files);
-                                                                                      print(images);
-                                                                                      // print("gilaaaaa " + result.toString());
-
-                                                                                      // data= null;
-                                                                                    });
-                                                                                    // _btnController
-                                                                                    //     .reset();
-
-                                                                                    // Navigator.pop(
-                                                                                    //   context,
-                                                                                    //   // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                                    // );
-                                                                                  },
-                                                                                ),
-                                                                              ),
-                                                                              file == null
-                                                                                  ? Container()
-                                                                                  : Container(
-                                                                                      padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
-                                                                                      child: Image.file(
-                                                                                       files,
-                                                                                        width: 80,
-                                                                                        height: 80,
-                                                                                        fit: BoxFit.cover,
-                                                                                      ),
-                                                                                    ),
-                                                                            ],
-                                                                          ),
+                                                                                FontWeight.bold)),
+                                                                    Text('No Kendaraan : ' + _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].noVehicles,
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text('Estimasi Berangkat : ' + _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].effectiveDateStart,
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text('Estimasi Tiba : ' + _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].effectiveDateEnd,
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text('Produk : ' + _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].product,
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'Kwantitas : ' +
+                                                                            _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].quantity
+                                                                                .toString(),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Container(
+                                                                        padding:
+                                                                            EdgeInsets.all(
+                                                                                10),
+                                                                        width:
+                                                                            150,
+                                                                        height:
+                                                                            150,
+                                                                        child:
+                                                                            InkWell(
+                                                                          onTap:
+                                                                              () {
+                                                                            Navigator.push(
+                                                                              context,
+                                                                              MaterialPageRoute(builder: (context) => Qrcode(url: _listNews.listHomeDetail[0].user.readyDeliveryOrder[posisi == null ? index : posisi].qrcode)),
+                                                                            );
+                                                                          },
+                                                                          child: SvgPicture.network(_listNews
+                                                                              .listHomeDetail[0]
+                                                                              .user
+                                                                              .readyDeliveryOrder[posisi == null ? index : posisi]
+                                                                              .qrcode),
+                                                                        )),
                                                                     Padding(
                                                                         padding:
-                                                                            EdgeInsets.all(5)),
-                                                                    posisi !=
-                                                                            null
-                                                                        ? Container()
-                                                                        : Container(
-                                                                            width:
-                                                                                120,
-                                                                            height:
-                                                                                60,
-                                                                            child:
-                                                                                SpringButton(
-                                                                              SpringButtonType.OnlyScale,
-                                                                              roundedRectButton("Accept", signInGradients, false),
-                                                                              onTap: () async {
-                                                                                await showDialog(
-                                                                                    context: context,
-                                                                                    builder: (BuildContext context) {
-                                                                                      return AlertDialog(
-                                                                                        shape: RoundedRectangleBorder(
-                                                                                          borderRadius: BorderRadius.circular(10),
-                                                                                          side: BorderSide(
-                                                                                            color: Colors.green[900],
-                                                                                            width: 5.0,
-                                                                                          ),
-                                                                                        ),
-                                                                                        title: Icon(
-                                                                                          Icons.directions_car,
-                                                                                          size: 120,
-                                                                                          color: Colors.green[900],
-                                                                                        ),
-                                                                                        content: SingleChildScrollView(
-                                                                                          child: ListBody(
-                                                                                            children: <Widget>[
-                                                                                              Text("Pengiriman Pesanan", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-
-                                                                                              Text("Apakah anda sudah selesai melakukan proses pengisian dan siap untuk berangkat ke lokasi customer?", style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
-                                                                                              // Text('Would you like to approve of this message?'),
-                                                                                            ],
-                                                                                          ),
-                                                                                        ),
-                                                                                        actions: <Widget>[
-                                                                                          new FlatButton(
-                                                                                            color: Colors.lightBlue[400],
-                                                                                            child: new Text("Ok",
-                                                                                                style: TextStyle(
-                                                                                                  color: Colors.white,
-                                                                                                )),
-                                                                                            onPressed: () async {
-                                                                                              SharedPreferences prefs = await SharedPreferences.getInstance();
-                                                                                              setState(() {
-                                                                                                prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
-                                                                                                prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
-                                                                                                prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
-                                                                                                prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
-                                                                                                prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
-                                                                                                prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
-                                                                                                prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
-                                                                                                prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
-                                                                                                idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
-                                                                                                posisi = index;
-                                                                                                data = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
-                                                                                                accept = true;
-                                                                                              });
-
-                                                                                              await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString()).then((value) async {
-                                                                                                if (value.statusCode == 200) {
-                                                                                                  print('hahahahahaahah');
-                                                                                                  final responseJson = json.decode(value.body);
-                                                                                                  await showDialog(
-                                                                                                      context: context,
-                                                                                                      builder: (BuildContext context) {
-                                                                                                        return AlertDialog(
-                                                                                                          shape: RoundedRectangleBorder(
-                                                                                                            borderRadius: BorderRadius.circular(10),
-                                                                                                            side: BorderSide(
-                                                                                                              color: Colors.green[900],
-                                                                                                              width: 5.0,
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                          title: Icon(
-                                                                                                            Icons.check,
-                                                                                                            size: 120,
-                                                                                                            color: Colors.green[900],
-                                                                                                          ),
-                                                                                                          content: SingleChildScrollView(
-                                                                                                            child: ListBody(
-                                                                                                              children: <Widget>[
-                                                                                                                Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-
-                                                                                                                Text("Telah berhasil diterima !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-                                                                                                                // Text('Would you like to approve of this message?'),
-                                                                                                              ],
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                          actions: <Widget>[
-                                                                                                            new FlatButton(
-                                                                                                              color: Colors.lightBlueAccent[400],
-                                                                                                              child: new Text("Ok",
-                                                                                                                  style: TextStyle(
-                                                                                                                    color: Colors.white,
-                                                                                                                  )),
-                                                                                                              onPressed: () {
-                                                                                                                Navigator.pop(
-                                                                                                                  context,
-                                                                                                                  // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                                                                );
-                                                                                                              },
-                                                                                                            ),
-                                                                                                          ],
-                                                                                                        );
-                                                                                                      });
-                                                                                                } else {
-                                                                                                  await showDialog(
-                                                                                                      context: context,
-                                                                                                      builder: (BuildContext context) {
-                                                                                                        return AlertDialog(
-                                                                                                          shape: RoundedRectangleBorder(
-                                                                                                            borderRadius: BorderRadius.circular(10),
-                                                                                                            side: BorderSide(
-                                                                                                              color: Colors.red[900],
-                                                                                                              width: 5.0,
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                          title: Icon(
-                                                                                                            Icons.clear,
-                                                                                                            size: 120,
-                                                                                                            color: Colors.red[900],
-                                                                                                          ),
-                                                                                                          content: SingleChildScrollView(
-                                                                                                            child: ListBody(
-                                                                                                              children: <Widget>[
-                                                                                                                Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-
-                                                                                                                Text("Gagal !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-                                                                                                                // Text('Would you like to approve of this message?'),
-                                                                                                              ],
-                                                                                                            ),
-                                                                                                          ),
-                                                                                                          actions: <Widget>[
-                                                                                                            new FlatButton(
-                                                                                                              color: Colors.red[900],
-                                                                                                              child: new Text("Ok"),
-                                                                                                              onPressed: () {
-                                                                                                                Navigator.pop(
-                                                                                                                  context,
-                                                                                                                  // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                                                                );
-                                                                                                              },
-                                                                                                            ),
-                                                                                                          ],
-                                                                                                        );
-                                                                                                      });
-                                                                                                }
-                                                                                              });
-                                                                                              Navigator.pop(
-                                                                                                context,
-                                                                                                // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                                              );
-                                                                                            },
-                                                                                          ),
-                                                                                          new FlatButton(
-                                                                                            color: Colors.red[900],
-                                                                                            child: new Text("Batal"),
-                                                                                            onPressed: () {
-                                                                                              Navigator.pop(
-                                                                                                context,
-                                                                                                MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                                              );
-                                                                                            },
-                                                                                          ),
-                                                                                        ],
-                                                                                      );
-                                                                                      // });
-                                                                                      //
-                                                                                    });
-                                                                              },
-
-                                                                              // onTap: () async {
-                                                                              //   SharedPreferences prefs = await SharedPreferences.getInstance();
-                                                                              //   setState(() {
-                                                                              //     prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
-                                                                              //     prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
-                                                                              //     prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
-                                                                              //     prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
-                                                                              //     prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
-                                                                              //     prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
-                                                                              //     prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
-                                                                              //     prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
-                                                                              //     idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
-                                                                              //     posisi = index;
-                                                                              //     accept = true;
-                                                                              //   });
-                                                                              //   await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
-
-                                                                              //   _btnController.reset();
-
-                                                                              // Navigator.push(context,
-                                                                              //     MaterialPageRoute(builder: (context) => Register()));
-                                                                              // },
-                                                                            ),
-                                                                          )
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            )))));
-                                          },
-                                        ),
-                                      ),
-                                    )
-                                  : SliverToBoxAdapter(
-                                      child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        width: a_width,
-                                        height: 350,
-                                        child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: 1,
-                                          // _listNews.listHomeDetail[0].hot.length,
-                                          itemBuilder: (context, index) {
-                                            return Container(
-                                                padding: EdgeInsets.all(10),
-                                                // width: a_width,
-                                                // height: a_height,
-                                                child: InkWell(
-                                                    onTap: () {},
-                                                    child: Card(
-                                                        color: Colors.grey[700],
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          side: BorderSide(
-                                                            color: gold,
-                                                            width: 2.0,
-                                                          ),
-                                                        ),
-                                                        child: Container(
-                                                            padding:
-                                                                EdgeInsets.all(
-                                                                    15),
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                    'No DO : ' +
-                                                                        prf.get(
-                                                                            'deliveryOrderNumber'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'No SO : ' +
-                                                                        prf.get(
-                                                                            'salesOrderId'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'No Kendaraan : ' +
-                                                                        prf.get(
-                                                                            'noVehicles'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Estimasi Berangkat : ' +
-                                                                        prf.get(
-                                                                            'effectiveDateStart'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Estimasi Tiba : ' +
-                                                                        prf.get(
-                                                                            'effectiveDateEnd'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Produk : ' +
-                                                                        prf.get(
-                                                                            'product'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Text(
-                                                                    'Kwantitas : ' +
-                                                                        prf.get(
-                                                                            'quantity'),
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            15,
-                                                                        fontWeight:
-                                                                            FontWeight.bold)),
-                                                                Padding(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            10)),
-                                                                Row(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .center,
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceEvenly,
-                                                                  children: [
+                                                                            EdgeInsets.all(10)),
                                                                     Row(
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .start,
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .spaceEvenly,
                                                                       children: [
-                                                                        Container(
-                                                                          width:
-                                                                              120,
-                                                                          height:
-                                                                              60,
-                                                                          child:
-                                                                              SpringButton(
-                                                                            SpringButtonType.OnlyScale,
-                                                                            roundedRectButton(
-                                                                                "Upload",
-                                                                                signUpGradients,
-                                                                                false),
-                                                                            onTapDown:
-                                                                                (_) async {
-                                                                            //  images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
-                                                                              files = await FilePicker.getFile();
-                                                                              // print('gila' + result.toString());
-                                                                              setState(() {
-                                                                                // images = result;
-                                                                                file = 1;
-                                                                                print(files);
-                                                                                // print(images.path);
-                                                                                // print("gilaaaaa " + result.toString());
-                                                                              });
-                                                                              // _btnController
-                                                                              //     .reset();
-
-                                                                              // Navigator.pop(
-                                                                              //   context,
-                                                                              //   // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                              // );
-                                                                            },
-                                                                          ),
-                                                                        ),
-                                                                        file == null
-                                                                            ? Container()
-                                                                            : Container(
-                                                                                padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
-                                                                                child: Image.file(
-                                                                                  files,
-                                                                                  width: 80,
-                                                                                  height: 80,
-                                                                                  fit: BoxFit.cover,
-                                                                                ),
-                                                                              ),
+                                                                        Icon(
+                                                                            Icons
+                                                                                .warning,
+                                                                            color:
+                                                                                Colors.yellow,
+                                                                            size: 15),
+                                                                        Text(
+                                                                            'JANGAN DI ACCEPT SEBELUM ANDA SELESAI MELAKUKAN PENGISIAN BBM.',
+                                                                            style: TextStyle(
+                                                                                color: Colors.red,
+                                                                                fontSize: 12,
+                                                                                fontWeight: FontWeight.bold))
                                                                       ],
                                                                     ),
                                                                     Padding(
                                                                         padding:
-                                                                            EdgeInsets.all(5)),
-                                                                    // posisi != null &&
-                                                                    //         data ==
-                                                                    //             null
-                                                                    //     ? Container()
-                                                                    //     : Container(
-                                                                    //         width:
-                                                                    //             120,
-                                                                    //         height:
-                                                                    //             60,
-                                                                    //         child:
-                                                                    //             SpringButton(
-                                                                    //           SpringButtonType.OnlyScale,
-                                                                    //           roundedRectButton("Accept", signInGradients, false),
-                                                                    //           onTap: () async {
-                                                                    //             await showDialog(
-                                                                    //                 context: context,
-                                                                    //                 builder: (BuildContext context) {
-                                                                    //                   return AlertDialog(
-                                                                    //                     shape: RoundedRectangleBorder(
-                                                                    //                       borderRadius: BorderRadius.circular(10),
-                                                                    //                       side: BorderSide(
-                                                                    //                         color: Colors.green[900],
-                                                                    //                         width: 5.0,
-                                                                    //                       ),
-                                                                    //                     ),
-                                                                    //                     // title: Image.network(
-                                                                    //                     //     _listPromoDetail
-                                                                    //                     //         .listDetailPromo[
-                                                                    //                     //             0]
-                                                                    //                     //         .image),
-                                                                    //                     content: SingleChildScrollView(
-                                                                    //                       child: ListBody(
-                                                                    //                         children: <Widget>[
-                                                                    //                           Text("Pengiriman Pesanan", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                            EdgeInsets.all(2)),
+                                                                    Row(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .center,
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceEvenly,
+                                                                      children: [
+                                                                        posisi ==
+                                                                                null
+                                                                            ? Container()
+                                                                            : Row(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                children: [
+                                                                                  Container(
+                                                                                    width: 120,
+                                                                                    height: 60,
+                                                                                    child: SpringButton(
+                                                                                      SpringButtonType.OnlyScale,
+                                                                                      roundedRectButton("Upload", signUpGradients, false),
+                                                                                      onTapDown: (_) async {
+                                                                                        // images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
+                                                                                        files = await FilePicker.getFile();
+                                                                                        // print(result);
+                                                                                        setState(() {
+                                                                                          // images = result;
+                                                                                          file = 1;
+                                                                                          print(files);
+                                                                                          print(images);
+                                                                                          // print("gilaaaaa " + result.toString());
 
-                                                                    //                           Text(
-                                                                    //                             "Apakah anda yakin menerima prngiriman pesanan ?",
-                                                                    //                           ),
-                                                                    //                           // Text('Would you like to approve of this message?'),
-                                                                    //                         ],
-                                                                    //                       ),
-                                                                    //                     ),
-                                                                    //                     actions: <Widget>[
-                                                                    //                       new FlatButton(
-                                                                    //                         color: Colors.lightBlue[400],
-                                                                    //                         child: new Text("Ok",
-                                                                    //                             style: TextStyle(
-                                                                    //                               color: Colors.white,
-                                                                    //                             )),
-                                                                    //                         onPressed: () async {
-                                                                    //                           SharedPreferences prefs = await SharedPreferences.getInstance();
-                                                                    //                           setState(() {
-                                                                    //                             prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
-                                                                    //                             prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
-                                                                    //                             prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
-                                                                    //                             prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
-                                                                    //                             prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
-                                                                    //                             prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
-                                                                    //                             prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
-                                                                    //                             prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
-                                                                    //                             idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
-                                                                    //                             posisi = index;
-                                                                    //                             accept = true;
-                                                                    //                           });
+                                                                                          // data= null;
+                                                                                        });
+                                                                                        // _btnController
+                                                                                        //     .reset();
 
-                                                                    //                           await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString()).then((value) async {
-                                                                    //                             if (value.statusCode == 200) {
-                                                                    //                               print('hahahahahaahah');
-                                                                    //                               final responseJson = json.decode(value.body);
-                                                                    //                               await showDialog(
-                                                                    //                                   context: context,
-                                                                    //                                   builder: (BuildContext context) {
-                                                                    //                                     return AlertDialog(
-                                                                    //                                       shape: RoundedRectangleBorder(
-                                                                    //                                         borderRadius: BorderRadius.circular(10),
-                                                                    //                                         side: BorderSide(
-                                                                    //                                           color: Colors.green[900],
-                                                                    //                                           width: 5.0,
-                                                                    //                                         ),
-                                                                    //                                       ),
-                                                                    //                                       title: Icon(
-                                                                    //                                         Icons.check,
-                                                                    //                                         size: 120,
-                                                                    //                                         color: Colors.green[900],
-                                                                    //                                       ),
-                                                                    //                                       content: SingleChildScrollView(
-                                                                    //                                         child: ListBody(
-                                                                    //                                           children: <Widget>[
-                                                                    //                                             Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                                        // Navigator.pop(
+                                                                                        //   context,
+                                                                                        //   // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                                        // );
+                                                                                      },
+                                                                                    ),
+                                                                                  ),
+                                                                                  file == null
+                                                                                      ? Container()
+                                                                                      : Container(
+                                                                                          padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
+                                                                                          child: Image.file(
+                                                                                            files,
+                                                                                            width: 80,
+                                                                                            height: 80,
+                                                                                            fit: BoxFit.cover,
+                                                                                          ),
+                                                                                        ),
+                                                                                ],
+                                                                              ),
+                                                                        Padding(
+                                                                            padding:
+                                                                                EdgeInsets.all(5)),
+                                                                        posisi !=
+                                                                                null
+                                                                            ? Container()
+                                                                            : Container(
+                                                                                width: 120,
+                                                                                height: 60,
+                                                                                child: SpringButton(
+                                                                                  SpringButtonType.OnlyScale,
+                                                                                  roundedRectButton("Accept", signInGradients, false),
+                                                                                  onTap: () async {
+                                                                                    await showDialog(
+                                                                                        context: context,
+                                                                                        builder: (BuildContext context) {
+                                                                                          return AlertDialog(
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              borderRadius: BorderRadius.circular(10),
+                                                                                              side: BorderSide(
+                                                                                                color: Colors.green[900],
+                                                                                                width: 5.0,
+                                                                                              ),
+                                                                                            ),
+                                                                                            title: Icon(
+                                                                                              Icons.directions_car,
+                                                                                              size: 120,
+                                                                                              color: Colors.green[900],
+                                                                                            ),
+                                                                                            content: SingleChildScrollView(
+                                                                                              child: ListBody(
+                                                                                                children: <Widget>[
+                                                                                                  Text("Pengiriman Pesanan", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
 
-                                                                    //                                             Text("Telah berhasil diterima !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-                                                                    //                                             // Text('Would you like to approve of this message?'),
-                                                                    //                                           ],
-                                                                    //                                         ),
-                                                                    //                                       ),
-                                                                    //                                       actions: <Widget>[
-                                                                    //                                         new FlatButton(
-                                                                    //                                           color: Colors.lightBlueAccent[400],
-                                                                    //                                           child: new Text("Ok",
-                                                                    //                                               style: TextStyle(
-                                                                    //                                                 color: Colors.white,
-                                                                    //                                               )),
-                                                                    //                                           onPressed: () {
-                                                                    //                                             Navigator.pop(
-                                                                    //                                               context,
-                                                                    //                                               // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                    //                                             );
-                                                                    //                                           },
-                                                                    //                                         ),
-                                                                    //                                       ],
-                                                                    //                                     );
-                                                                    //                                   });
-                                                                    //                             } else {
-                                                                    //                               await showDialog(
-                                                                    //                                   context: context,
-                                                                    //                                   builder: (BuildContext context) {
-                                                                    //                                     return AlertDialog(
-                                                                    //                                       shape: RoundedRectangleBorder(
-                                                                    //                                         borderRadius: BorderRadius.circular(10),
-                                                                    //                                         side: BorderSide(
-                                                                    //                                           color: Colors.red[900],
-                                                                    //                                           width: 5.0,
-                                                                    //                                         ),
-                                                                    //                                       ),
-                                                                    //                                       title: Icon(
-                                                                    //                                         Icons.clear,
-                                                                    //                                         size: 120,
-                                                                    //                                         color: Colors.red[900],
-                                                                    //                                       ),
-                                                                    //                                       content: SingleChildScrollView(
-                                                                    //                                         child: ListBody(
-                                                                    //                                           children: <Widget>[
-                                                                    //                                             Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                                                  Text("Apakah anda sudah selesai melakukan proses pengisian dan siap untuk berangkat ke lokasi customer?", style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold)),
+                                                                                                  // Text('Would you like to approve of this message?'),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                            actions: <Widget>[
+                                                                                              new FlatButton(
+                                                                                                color: Colors.lightBlue[400],
+                                                                                                child: new Text("Ok",
+                                                                                                    style: TextStyle(
+                                                                                                      color: Colors.white,
+                                                                                                    )),
+                                                                                                onPressed: () async {
+                                                                                                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                                                  setState(() {
+                                                                                                    prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+                                                                                                    prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
+                                                                                                    prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
+                                                                                                    prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
+                                                                                                    prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
+                                                                                                    prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
+                                                                                                    prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
+                                                                                                    prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
+                                                                                                    idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
+                                                                                                    posisi = index;
+                                                                                                    data = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
+                                                                                                    accept = true;
+                                                                                                  });
 
-                                                                    //                                             Text("Gagal !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
-                                                                    //                                             // Text('Would you like to approve of this message?'),
-                                                                    //                                           ],
-                                                                    //                                         ),
-                                                                    //                                       ),
-                                                                    //                                       actions: <Widget>[
-                                                                    //                                         new FlatButton(
-                                                                    //                                           color: Colors.red[900],
-                                                                    //                                           child: new Text("Ok"),
-                                                                    //                                           onPressed: () {
-                                                                    //                                             Navigator.pop(
-                                                                    //                                               context,
-                                                                    //                                               MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                    //                                             );
-                                                                    //                                           },
-                                                                    //                                         ),
-                                                                    //                                       ],
-                                                                    //                                     );
-                                                                    //                                     // Navigator.pushReplacement(
-                                                                    //                                     //     context,
-                                                                    //                                     //     MaterialPageRoute(
-                                                                    //                                     //         builder: (context) => DetailPromo(
-                                                                    //                                     //             id: _listPromoDetail
-                                                                    //                                     //                 .listDetailPromo[0]
-                                                                    //                                     //                 .id
-                                                                    //                                     //                 .toString())));
-                                                                    //                                   });
-                                                                    //                             }
-                                                                    //                           });
-                                                                    //                           Navigator.pop(
-                                                                    //                             context,
-                                                                    //                             MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                                    //                           );
-                                                                    //                         },
-                                                                    //                       ),
-                                                                    //                       new FlatButton(
-                                                                    //                         color: Colors.red[900],
-                                                                    //                         child: new Text("Batal"),
-                                                                    //                         onPressed: () {
-                                                                    //                           // Navigator
-                                                                    //                           //     .pop(
-                                                                    //                           //   context,
-                                                                    //                           //   MaterialPageRoute(
-                                                                    //                           //       builder: (context) =>
-                                                                    //                           //           Driver()),
-                                                                    //                           // );
-                                                                    //                         },
-                                                                    //                       ),
-                                                                    //                     ],
-                                                                    //                   );
-                                                                    //                   // });
-                                                                    //                   //
-                                                                    //                 });
-                                                                    //           },
-                                                                    //           // _showMyDialog(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString(), index),
-                                                                    //           // onTap: () => _showMyDialog('minyak')
-                                                                    //           //  async {
-                                                                    //           //             SharedPreferences prefs = await SharedPreferences.getInstance();
-                                                                    //           //             setState(() {
-                                                                    //           //               prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
-                                                                    //           //               prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
-                                                                    //           //               prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
-                                                                    //           //               prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
-                                                                    //           //               prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
-                                                                    //           //               prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
-                                                                    //           //               prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
-                                                                    //           //               prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
-                                                                    //           //               idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
-                                                                    //           //               posisi = index;
-                                                                    //           //               accept = true;
-                                                                    //           //             });
-                                                                    //           //             await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+                                                                                                  await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString()).then((value) async {
+                                                                                                    if (value.statusCode == 200) {
+                                                                                                      print('hahahahahaahah');
+                                                                                                      final responseJson = json.decode(value.body);
+                                                                                                      await showDialog(
+                                                                                                          context: context,
+                                                                                                          builder: (BuildContext context) {
+                                                                                                            return AlertDialog(
+                                                                                                              shape: RoundedRectangleBorder(
+                                                                                                                borderRadius: BorderRadius.circular(10),
+                                                                                                                side: BorderSide(
+                                                                                                                  color: Colors.green[900],
+                                                                                                                  width: 5.0,
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                              title: Icon(
+                                                                                                                Icons.check,
+                                                                                                                size: 120,
+                                                                                                                color: Colors.green[900],
+                                                                                                              ),
+                                                                                                              content: SingleChildScrollView(
+                                                                                                                child: ListBody(
+                                                                                                                  children: <Widget>[
+                                                                                                                    Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
 
-                                                                    //           // _btnController.reset();
+                                                                                                                    Text("Telah berhasil diterima !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                                                                    // Text('Would you like to approve of this message?'),
+                                                                                                                  ],
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                              actions: <Widget>[
+                                                                                                                new FlatButton(
+                                                                                                                  color: Colors.lightBlueAccent[400],
+                                                                                                                  child: new Text("Ok",
+                                                                                                                      style: TextStyle(
+                                                                                                                        color: Colors.white,
+                                                                                                                      )),
+                                                                                                                  onPressed: () {
+                                                                                                                    Navigator.pop(
+                                                                                                                      context,
+                                                                                                                      // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                                                                    );
+                                                                                                                  },
+                                                                                                                ),
+                                                                                                              ],
+                                                                                                            );
+                                                                                                          });
+                                                                                                    } else {
+                                                                                                      await showDialog(
+                                                                                                          context: context,
+                                                                                                          builder: (BuildContext context) {
+                                                                                                            return AlertDialog(
+                                                                                                              shape: RoundedRectangleBorder(
+                                                                                                                borderRadius: BorderRadius.circular(10),
+                                                                                                                side: BorderSide(
+                                                                                                                  color: Colors.red[900],
+                                                                                                                  width: 5.0,
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                              title: Icon(
+                                                                                                                Icons.clear,
+                                                                                                                size: 120,
+                                                                                                                color: Colors.red[900],
+                                                                                                              ),
+                                                                                                              content: SingleChildScrollView(
+                                                                                                                child: ListBody(
+                                                                                                                  children: <Widget>[
+                                                                                                                    Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
 
-                                                                    //           // Navigator.push(context,
-                                                                    //           //     MaterialPageRoute(builder: (context) => Register()));
-                                                                    //           // },
-                                                                    //         ),
-                                                                    //       )
+                                                                                                                    Text("Gagal !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                                                                    // Text('Would you like to approve of this message?'),
+                                                                                                                  ],
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                              actions: <Widget>[
+                                                                                                                new FlatButton(
+                                                                                                                  color: Colors.red[900],
+                                                                                                                  child: new Text("Ok"),
+                                                                                                                  onPressed: () {
+                                                                                                                    Navigator.pop(
+                                                                                                                      context,
+                                                                                                                      // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                                                                    );
+                                                                                                                  },
+                                                                                                                ),
+                                                                                                              ],
+                                                                                                            );
+                                                                                                          });
+                                                                                                    }
+                                                                                                  });
+                                                                                                  Navigator.pop(
+                                                                                                    context,
+                                                                                                    // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                                                  );
+                                                                                                },
+                                                                                              ),
+                                                                                              new FlatButton(
+                                                                                                color: Colors.red[900],
+                                                                                                child: new Text("Batal"),
+                                                                                                onPressed: () {
+                                                                                                  Navigator.pop(
+                                                                                                    context,
+                                                                                                    MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                                                  );
+                                                                                                },
+                                                                                              ),
+                                                                                            ],
+                                                                                          );
+                                                                                          // });
+                                                                                          //
+                                                                                        });
+                                                                                  },
+
+                                                                                  // onTap: () async {
+                                                                                  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                                  //   setState(() {
+                                                                                  //     prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+                                                                                  //     prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
+                                                                                  //     prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
+                                                                                  //     prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
+                                                                                  //     prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
+                                                                                  //     prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
+                                                                                  //     prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
+                                                                                  //     prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
+                                                                                  //     idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
+                                                                                  //     posisi = index;
+                                                                                  //     accept = true;
+                                                                                  //   });
+                                                                                  //   await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+
+                                                                                  //   _btnController.reset();
+
+                                                                                  // Navigator.push(context,
+                                                                                  //     MaterialPageRoute(builder: (context) => Register()));
+                                                                                  // },
+                                                                                ),
+                                                                              )
+                                                                      ],
+                                                                    )
                                                                   ],
-                                                                )
-                                                              ],
-                                                            )))));
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                              SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (BuildContext context, int index) {
-                                    return email == null
-                                        ? Container()
-                                        : Container(
-                                            // color: Colors.black12,
+                                                                )))));
+                                              },
+                                            ),
+                                          ),
+                                        )
+                                      : SliverToBoxAdapter(
+                                          child: Container(
                                             padding: EdgeInsets.all(10),
-                                            // width: c_width,
-                                            // height: MediaQuery.of(context)
-                                            //         .size
-                                            //         .height *
-                                            //     0.42,
-                                            child: Card(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  side: BorderSide(
-                                                    color: gold,
-                                                    width: 2.0,
-                                                  ),
-                                                ),
-                                                color: Colors.black12,
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment
-                                                          .stretch,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: <Widget>[
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                20.0,
-                                                                10.0,
-                                                                20.0,
-                                                                20.0),
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: <Widget>[
-                                                            // ClipRRect(
-                                                            //     borderRadius:
-                                                            //         BorderRadius
-                                                            //             .circular(
-                                                            //                 50.0),
-                                                            //     child: Image
-                                                            //         .network(
-                                                            //       _listNews
-                                                            //           .listHomeDetail[
-                                                            //               0]
-                                                            //           .driver
-                                                            //           .driver
-                                                            //           .avatar,
-                                                            //       fit: BoxFit
-                                                            //           .cover,
-                                                            //       width: 50,
-                                                            //       height: 50,
-                                                            //     )),
-                                                            // Padding(
-                                                            //     padding: EdgeInsets
-                                                            //         .only(
-                                                            //             left:
-                                                            //                 5)),
-                                                            Column(
+                                            width: a_width,
+                                            height: 350,
+                                            child: ListView.builder(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: 1,
+                                              // _listNews.listHomeDetail[0].hot.length,
+                                              itemBuilder: (context, index) {
+                                                return Container(
+                                                    padding: EdgeInsets.all(10),
+                                                    // width: a_width,
+                                                    // height: a_height,
+                                                    child: InkWell(
+                                                        onTap: () {},
+                                                        child: Card(
+                                                            color: Colors
+                                                                .grey[700],
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              side: BorderSide(
+                                                                color: gold,
+                                                                width: 2.0,
+                                                              ),
+                                                            ),
+                                                            child: Container(
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .all(
+                                                                            15),
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                        'No DO : ' +
+                                                                            prf.get(
+                                                                                'deliveryOrderNumber'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'No SO : ' +
+                                                                            prf.get(
+                                                                                'salesOrderId'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'No Kendaraan : ' +
+                                                                            prf.get(
+                                                                                'noVehicles'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'Estimasi Berangkat : ' +
+                                                                            prf.get(
+                                                                                'effectiveDateStart'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'Estimasi Tiba : ' +
+                                                                            prf.get(
+                                                                                'effectiveDateEnd'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'Produk : ' +
+                                                                            prf.get(
+                                                                                'product'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Text(
+                                                                        'Kwantitas : ' +
+                                                                            prf.get(
+                                                                                'quantity'),
+                                                                        style: TextStyle(
+                                                                            color: Colors
+                                                                                .white,
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.bold)),
+                                                                    Padding(
+                                                                        padding:
+                                                                            EdgeInsets.all(10)),
+                                                                    Row(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .center,
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceEvenly,
+                                                                      children: [
+                                                                        Row(
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.start,
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Container(
+                                                                              width: 120,
+                                                                              height: 60,
+                                                                              child: SpringButton(
+                                                                                SpringButtonType.OnlyScale,
+                                                                                roundedRectButton("Upload", signUpGradients, false),
+                                                                                onTapDown: (_) async {
+                                                                                  //  images = await Navigator.push(context, MaterialPageRoute(builder: (context) => ActivCamera()));
+                                                                                  files = await FilePicker.getFile();
+                                                                                  // print('gila' + result.toString());
+                                                                                  setState(() {
+                                                                                    // images = result;
+                                                                                    file = 1;
+                                                                                    print(files);
+                                                                                    // print(images.path);
+                                                                                    // print("gilaaaaa " + result.toString());
+                                                                                  });
+                                                                                  // _btnController
+                                                                                  //     .reset();
+
+                                                                                  // Navigator.pop(
+                                                                                  //   context,
+                                                                                  //   // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                                  // );
+                                                                                },
+                                                                              ),
+                                                                            ),
+                                                                            file == null
+                                                                                ? Container()
+                                                                                : Container(
+                                                                                    padding: EdgeInsets.fromLTRB(30, 5, 5, 5),
+                                                                                    child: Image.file(
+                                                                                      files,
+                                                                                      width: 80,
+                                                                                      height: 80,
+                                                                                      fit: BoxFit.cover,
+                                                                                    ),
+                                                                                  ),
+                                                                          ],
+                                                                        ),
+                                                                        Padding(
+                                                                            padding:
+                                                                                EdgeInsets.all(5)),
+                                                                        // posisi != null &&
+                                                                        //         data ==
+                                                                        //             null
+                                                                        //     ? Container()
+                                                                        //     : Container(
+                                                                        //         width:
+                                                                        //             120,
+                                                                        //         height:
+                                                                        //             60,
+                                                                        //         child:
+                                                                        //             SpringButton(
+                                                                        //           SpringButtonType.OnlyScale,
+                                                                        //           roundedRectButton("Accept", signInGradients, false),
+                                                                        //           onTap: () async {
+                                                                        //             await showDialog(
+                                                                        //                 context: context,
+                                                                        //                 builder: (BuildContext context) {
+                                                                        //                   return AlertDialog(
+                                                                        //                     shape: RoundedRectangleBorder(
+                                                                        //                       borderRadius: BorderRadius.circular(10),
+                                                                        //                       side: BorderSide(
+                                                                        //                         color: Colors.green[900],
+                                                                        //                         width: 5.0,
+                                                                        //                       ),
+                                                                        //                     ),
+                                                                        //                     // title: Image.network(
+                                                                        //                     //     _listPromoDetail
+                                                                        //                     //         .listDetailPromo[
+                                                                        //                     //             0]
+                                                                        //                     //         .image),
+                                                                        //                     content: SingleChildScrollView(
+                                                                        //                       child: ListBody(
+                                                                        //                         children: <Widget>[
+                                                                        //                           Text("Pengiriman Pesanan", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+
+                                                                        //                           Text(
+                                                                        //                             "Apakah anda yakin menerima prngiriman pesanan ?",
+                                                                        //                           ),
+                                                                        //                           // Text('Would you like to approve of this message?'),
+                                                                        //                         ],
+                                                                        //                       ),
+                                                                        //                     ),
+                                                                        //                     actions: <Widget>[
+                                                                        //                       new FlatButton(
+                                                                        //                         color: Colors.lightBlue[400],
+                                                                        //                         child: new Text("Ok",
+                                                                        //                             style: TextStyle(
+                                                                        //                               color: Colors.white,
+                                                                        //                             )),
+                                                                        //                         onPressed: () async {
+                                                                        //                           SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                        //                           setState(() {
+                                                                        //                             prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+                                                                        //                             prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
+                                                                        //                             prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
+                                                                        //                             prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
+                                                                        //                             prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
+                                                                        //                             prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
+                                                                        //                             prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
+                                                                        //                             prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
+                                                                        //                             idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
+                                                                        //                             posisi = index;
+                                                                        //                             accept = true;
+                                                                        //                           });
+
+                                                                        //                           await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString()).then((value) async {
+                                                                        //                             if (value.statusCode == 200) {
+                                                                        //                               print('hahahahahaahah');
+                                                                        //                               final responseJson = json.decode(value.body);
+                                                                        //                               await showDialog(
+                                                                        //                                   context: context,
+                                                                        //                                   builder: (BuildContext context) {
+                                                                        //                                     return AlertDialog(
+                                                                        //                                       shape: RoundedRectangleBorder(
+                                                                        //                                         borderRadius: BorderRadius.circular(10),
+                                                                        //                                         side: BorderSide(
+                                                                        //                                           color: Colors.green[900],
+                                                                        //                                           width: 5.0,
+                                                                        //                                         ),
+                                                                        //                                       ),
+                                                                        //                                       title: Icon(
+                                                                        //                                         Icons.check,
+                                                                        //                                         size: 120,
+                                                                        //                                         color: Colors.green[900],
+                                                                        //                                       ),
+                                                                        //                                       content: SingleChildScrollView(
+                                                                        //                                         child: ListBody(
+                                                                        //                                           children: <Widget>[
+                                                                        //                                             Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+
+                                                                        //                                             Text("Telah berhasil diterima !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                        //                                             // Text('Would you like to approve of this message?'),
+                                                                        //                                           ],
+                                                                        //                                         ),
+                                                                        //                                       ),
+                                                                        //                                       actions: <Widget>[
+                                                                        //                                         new FlatButton(
+                                                                        //                                           color: Colors.lightBlueAccent[400],
+                                                                        //                                           child: new Text("Ok",
+                                                                        //                                               style: TextStyle(
+                                                                        //                                                 color: Colors.white,
+                                                                        //                                               )),
+                                                                        //                                           onPressed: () {
+                                                                        //                                             Navigator.pop(
+                                                                        //                                               context,
+                                                                        //                                               // MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                        //                                             );
+                                                                        //                                           },
+                                                                        //                                         ),
+                                                                        //                                       ],
+                                                                        //                                     );
+                                                                        //                                   });
+                                                                        //                             } else {
+                                                                        //                               await showDialog(
+                                                                        //                                   context: context,
+                                                                        //                                   builder: (BuildContext context) {
+                                                                        //                                     return AlertDialog(
+                                                                        //                                       shape: RoundedRectangleBorder(
+                                                                        //                                         borderRadius: BorderRadius.circular(10),
+                                                                        //                                         side: BorderSide(
+                                                                        //                                           color: Colors.red[900],
+                                                                        //                                           width: 5.0,
+                                                                        //                                         ),
+                                                                        //                                       ),
+                                                                        //                                       title: Icon(
+                                                                        //                                         Icons.clear,
+                                                                        //                                         size: 120,
+                                                                        //                                         color: Colors.red[900],
+                                                                        //                                       ),
+                                                                        //                                       content: SingleChildScrollView(
+                                                                        //                                         child: ListBody(
+                                                                        //                                           children: <Widget>[
+                                                                        //                                             Text("Pesanan Pengiriman ", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+
+                                                                        //                                             Text("Gagal !!!", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold)),
+                                                                        //                                             // Text('Would you like to approve of this message?'),
+                                                                        //                                           ],
+                                                                        //                                         ),
+                                                                        //                                       ),
+                                                                        //                                       actions: <Widget>[
+                                                                        //                                         new FlatButton(
+                                                                        //                                           color: Colors.red[900],
+                                                                        //                                           child: new Text("Ok"),
+                                                                        //                                           onPressed: () {
+                                                                        //                                             Navigator.pop(
+                                                                        //                                               context,
+                                                                        //                                               MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                        //                                             );
+                                                                        //                                           },
+                                                                        //                                         ),
+                                                                        //                                       ],
+                                                                        //                                     );
+                                                                        //                                     // Navigator.pushReplacement(
+                                                                        //                                     //     context,
+                                                                        //                                     //     MaterialPageRoute(
+                                                                        //                                     //         builder: (context) => DetailPromo(
+                                                                        //                                     //             id: _listPromoDetail
+                                                                        //                                     //                 .listDetailPromo[0]
+                                                                        //                                     //                 .id
+                                                                        //                                     //                 .toString())));
+                                                                        //                                   });
+                                                                        //                             }
+                                                                        //                           });
+                                                                        //                           Navigator.pop(
+                                                                        //                             context,
+                                                                        //                             MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                                        //                           );
+                                                                        //                         },
+                                                                        //                       ),
+                                                                        //                       new FlatButton(
+                                                                        //                         color: Colors.red[900],
+                                                                        //                         child: new Text("Batal"),
+                                                                        //                         onPressed: () {
+                                                                        //                           // Navigator
+                                                                        //                           //     .pop(
+                                                                        //                           //   context,
+                                                                        //                           //   MaterialPageRoute(
+                                                                        //                           //       builder: (context) =>
+                                                                        //                           //           Driver()),
+                                                                        //                           // );
+                                                                        //                         },
+                                                                        //                       ),
+                                                                        //                     ],
+                                                                        //                   );
+                                                                        //                   // });
+                                                                        //                   //
+                                                                        //                 });
+                                                                        //           },
+                                                                        //           // _showMyDialog(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString(), _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString(), index),
+                                                                        //           // onTap: () => _showMyDialog('minyak')
+                                                                        //           //  async {
+                                                                        //           //             SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                        //           //             setState(() {
+                                                                        //           //               prefs.setString('Idnya', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+                                                                        //           //               prefs.setString('deliveryOrderNumber', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].deliveryOrderNumber.toString());
+                                                                        //           //               prefs.setString('salesOrderId', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].salesOrderId.toString());
+                                                                        //           //               prefs.setString('noVehicles', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].noVehicles.toString());
+                                                                        //           //               prefs.setString('effectiveDateStart', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateStart.toString());
+                                                                        //           //               prefs.setString('effectiveDateEnd', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].effectiveDateEnd.toString());
+                                                                        //           //               prefs.setString('product', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].product.toString());
+                                                                        //           //               prefs.setString('quantity', _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].quantity.toString());
+                                                                        //           //               idnya = _listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString();
+                                                                        //           //               posisi = index;
+                                                                        //           //               accept = true;
+                                                                        //           //             });
+                                                                        //           //             await accepted(_listNews.listHomeDetail[0].user.readyDeliveryOrder[index].id.toString());
+
+                                                                        //           // _btnController.reset();
+
+                                                                        //           // Navigator.push(context,
+                                                                        //           //     MaterialPageRoute(builder: (context) => Register()));
+                                                                        //           // },
+                                                                        //         ),
+                                                                        //       )
+                                                                      ],
+                                                                    )
+                                                                  ],
+                                                                )))));
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                  SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (BuildContext context, int index) {
+                                        return email == null
+                                            ? Container()
+                                            : Container(
+                                                // color: Colors.black12,
+                                                padding: EdgeInsets.all(10),
+                                                // width: c_width,
+                                                // height: MediaQuery.of(context)
+                                                //         .size
+                                                //         .height *
+                                                //     0.42,
+                                                child: Card(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                      side: BorderSide(
+                                                        color: gold,
+                                                        width: 2.0,
+                                                      ),
+                                                    ),
+                                                    color: Colors.black12,
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .stretch,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: <Widget>[
+                                                        Padding(
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    20.0,
+                                                                    10.0,
+                                                                    20.0,
+                                                                    20.0),
+                                                            child: Row(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: <
+                                                                  Widget>[
+                                                                // ClipRRect(
+                                                                //     borderRadius:
+                                                                //         BorderRadius
+                                                                //             .circular(
+                                                                //                 50.0),
+                                                                //     child: Image
+                                                                //         .network(
+                                                                //       _listNews
+                                                                //           .listHomeDetail[
+                                                                //               0]
+                                                                //           .driver
+                                                                //           .driver
+                                                                //           .avatar,
+                                                                //       fit: BoxFit
+                                                                //           .cover,
+                                                                //       width: 50,
+                                                                //       height: 50,
+                                                                //     )),
+                                                                // Padding(
+                                                                //     padding: EdgeInsets
+                                                                //         .only(
+                                                                //             left:
+                                                                //                 5)),
+                                                                Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .center,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Text(
+                                                                        releaseTime.hour.toInt() <=
+                                                                                12
+                                                                            ? "Good Morning"
+                                                                            : releaseTime.hour.toInt() <=
+                                                                                    18
+                                                                                ? 'Good Afternoon'
+                                                                                : "Good Evening",
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.white,
+                                                                            fontSize: 10)),
+                                                                    // Text(
+                                                                    //     _listNews
+                                                                    //         .listHomeDetail[
+                                                                    //             0]
+                                                                    //         .driver
+                                                                    //         .driver
+                                                                    //         .name,
+                                                                    //     style: TextStyle(
+                                                                    //         color: Colors
+                                                                    //             .white,
+                                                                    //         fontSize:
+                                                                    //             15)),
+                                                                  ],
+                                                                ),
+                                                                // Padding(
+                                                                //     padding: EdgeInsets
+                                                                //         .only(
+                                                                //             left:
+                                                                //                 60,
+                                                                //             right:
+                                                                //                 20)),
+                                                                Row(
+                                                                  children: [
+                                                                    InkWell(
+                                                                        onTap:
+                                                                            () {
+                                                                          Navigator.push(
+                                                                              context,
+                                                                              MaterialPageRoute(
+                                                                                builder: (context) => AllArrivalDetail(),
+                                                                              ));
+                                                                        },
+                                                                        child:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .notifications_active,
+                                                                          size:
+                                                                              30,
+                                                                          color:
+                                                                              gold,
+                                                                        )),
+                                                                    Text(
+                                                                      "History",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              20,
+                                                                          color:
+                                                                              gold),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            )),
+                                                        Divider(
+                                                          endIndent: 20.0,
+                                                          indent: 20.0,
+                                                          height: 1.0,
+                                                          thickness: 5,
+                                                          color: gold,
+                                                        ),
+                                                        Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    top: 10)),
+                                                        // Image.asset(
+                                                        //   'assets/pertamina-loyalty-card.png',
+                                                        //   fit: BoxFit.cover,
+                                                        // )
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          width: 200,
+                                                          height: 200,
+                                                          child:
+                                                              RawMaterialButton(
+                                                            onPressed: () =>
+                                                                // _showMyDialog(),
+                                                                // async {
+                                                                __showMyDialog(),
+
+                                                            // SharedPreferences
+                                                            //     prefs =
+                                                            //     await SharedPreferences
+                                                            //         .getInstance();
+                                                            // var idDO = prefs
+                                                            //     .get('Idnya');
+
+                                                            // await kirimdata(
+                                                            //         files,
+                                                            //         idDO == null
+                                                            //             ? idnya
+                                                            //             : idDO)
+                                                            //     .then(
+                                                            //         (value) async {
+                                                            //   prefs.remove(
+                                                            //       'Idnya');
+                                                            //   prefs.remove(
+                                                            //       'deliveryOrderNumber');
+                                                            //   prefs.remove(
+                                                            //       'salesOrderId');
+                                                            //   prefs.remove(
+                                                            //       'noVehicles');
+                                                            //   prefs.remove(
+                                                            //       'effectiveDateStart');
+                                                            //   prefs.remove(
+                                                            //       'effectiveDateEnd');
+                                                            //   prefs.remove(
+                                                            //       'product');
+                                                            //   prefs.remove(
+                                                            //       'quantity');
+                                                            //   print(value);
+                                                            //   if (value
+                                                            //           .statusCode ==
+                                                            //       200) {
+                                                            //     setState(() {
+                                                            //       posisi = null;
+                                                            //     });
+
+                                                            //     print(
+                                                            //         'hahahahahaahah');
+                                                            //     final responseJson =
+                                                            //         json.decode(
+                                                            //             value
+                                                            //                 .body);
+                                                            //   } else {
+                                                            //     showDialog(
+                                                            //         context:
+                                                            //             context,
+                                                            //         builder:
+                                                            //             (BuildContext
+                                                            //                 context) {
+                                                            //           return AlertDialog(
+                                                            //             title: new Text(
+                                                            //                 "Penukaran Promo "
+                                                            //                 "Gagal !!!"),
+                                                            //             actions: <
+                                                            //                 Widget>[
+                                                            //               new FlatButton(
+                                                            //                 child:
+                                                            //                     new Text("Ok"),
+                                                            //                 onPressed:
+                                                            //                     () {
+                                                            //                   Navigator.pop(
+                                                            //                     context,
+                                                            //                     MaterialPageRoute(builder: (context) => DriverHomeDetail()),
+                                                            //                   );
+                                                            //                 },
+                                                            //               ),
+                                                            //             ],
+                                                            //           );
+                                                            //         });
+                                                            //   }
+                                                            // });
+                                                            // },
+                                                            child: Column(
                                                               crossAxisAlignment:
                                                                   CrossAxisAlignment
                                                                       .center,
@@ -1765,219 +1916,51 @@ class _DriverHomeState extends State<DriverHomeDetail> {
                                                                       .center,
                                                               children: <
                                                                   Widget>[
+                                                                Icon(
+                                                                  Icons
+                                                                      .person_pin,
+                                                                  color: Colors
+                                                                      .blue[900]
+                                                                      .withOpacity(
+                                                                          0.5),
+                                                                  size: 80.0,
+                                                                ),
                                                                 Text(
-                                                                    releaseTime.hour.toInt() <=
-                                                                            12
-                                                                        ? "Good Morning"
-                                                                        : releaseTime.hour.toInt() <=
-                                                                                18
-                                                                            ? 'Good Afternoon'
-                                                                            : "Good Evening",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            10)),
-                                                                // Text(
-                                                                //     _listNews
-                                                                //         .listHomeDetail[
-                                                                //             0]
-                                                                //         .driver
-                                                                //         .driver
-                                                                //         .name,
-                                                                //     style: TextStyle(
-                                                                //         color: Colors
-                                                                //             .white,
-                                                                //         fontSize:
-                                                                //             15)),
-                                                              ],
-                                                            ),
-                                                            // Padding(
-                                                            //     padding: EdgeInsets
-                                                            //         .only(
-                                                            //             left:
-                                                            //                 60,
-                                                            //             right:
-                                                            //                 20)),
-                                                            Row(
-                                                              children: [
-                                                                InkWell(
-                                                                    onTap: () {
-                                                                      Navigator.push(
-                                                                          context,
-                                                                          MaterialPageRoute(
-                                                                            builder: (context) =>
-                                                                                AllArrivalDetail(),
-                                                                          ));
-                                                                    },
-                                                                    child: Icon(
-                                                                      Icons
-                                                                          .notifications_active,
-                                                                      size: 30,
-                                                                      color:
-                                                                          gold,
-                                                                    )),
-                                                                Text(
-                                                                  "History",
+                                                                  "Arrive",
                                                                   style: TextStyle(
                                                                       fontSize:
                                                                           20,
-                                                                      color:
-                                                                          gold),
+                                                                      color: Colors
+                                                                              .blue[
+                                                                          900]),
                                                                 ),
                                                               ],
                                                             ),
-                                                          ],
-                                                        )),
-                                                    Divider(
-                                                      endIndent: 20.0,
-                                                      indent: 20.0,
-                                                      height: 1.0,
-                                                      thickness: 5,
-                                                      color: gold,
-                                                    ),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                top: 10)),
-                                                    // Image.asset(
-                                                    //   'assets/pertamina-loyalty-card.png',
-                                                    //   fit: BoxFit.cover,
-                                                    // )
-                                                    Container(
-                                                      padding:
-                                                          EdgeInsets.all(10),
-                                                      width: 200,
-                                                      height: 200,
-                                                      child: RawMaterialButton(
-                                                        onPressed: () =>
-                                                            // _showMyDialog(),
-                                                            // async {
-                                                            __showMyDialog(),
-
-                                                        // SharedPreferences
-                                                        //     prefs =
-                                                        //     await SharedPreferences
-                                                        //         .getInstance();
-                                                        // var idDO = prefs
-                                                        //     .get('Idnya');
-
-                                                        // await kirimdata(
-                                                        //         files,
-                                                        //         idDO == null
-                                                        //             ? idnya
-                                                        //             : idDO)
-                                                        //     .then(
-                                                        //         (value) async {
-                                                        //   prefs.remove(
-                                                        //       'Idnya');
-                                                        //   prefs.remove(
-                                                        //       'deliveryOrderNumber');
-                                                        //   prefs.remove(
-                                                        //       'salesOrderId');
-                                                        //   prefs.remove(
-                                                        //       'noVehicles');
-                                                        //   prefs.remove(
-                                                        //       'effectiveDateStart');
-                                                        //   prefs.remove(
-                                                        //       'effectiveDateEnd');
-                                                        //   prefs.remove(
-                                                        //       'product');
-                                                        //   prefs.remove(
-                                                        //       'quantity');
-                                                        //   print(value);
-                                                        //   if (value
-                                                        //           .statusCode ==
-                                                        //       200) {
-                                                        //     setState(() {
-                                                        //       posisi = null;
-                                                        //     });
-
-                                                        //     print(
-                                                        //         'hahahahahaahah');
-                                                        //     final responseJson =
-                                                        //         json.decode(
-                                                        //             value
-                                                        //                 .body);
-                                                        //   } else {
-                                                        //     showDialog(
-                                                        //         context:
-                                                        //             context,
-                                                        //         builder:
-                                                        //             (BuildContext
-                                                        //                 context) {
-                                                        //           return AlertDialog(
-                                                        //             title: new Text(
-                                                        //                 "Penukaran Promo "
-                                                        //                 "Gagal !!!"),
-                                                        //             actions: <
-                                                        //                 Widget>[
-                                                        //               new FlatButton(
-                                                        //                 child:
-                                                        //                     new Text("Ok"),
-                                                        //                 onPressed:
-                                                        //                     () {
-                                                        //                   Navigator.pop(
-                                                        //                     context,
-                                                        //                     MaterialPageRoute(builder: (context) => DriverHomeDetail()),
-                                                        //                   );
-                                                        //                 },
-                                                        //               ),
-                                                        //             ],
-                                                        //           );
-                                                        //         });
-                                                        //   }
-                                                        // });
-                                                        // },
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: <Widget>[
-                                                            Icon(
-                                                              Icons.person_pin,
-                                                              color: Colors
-                                                                  .blue[900]
-                                                                  .withOpacity(
-                                                                      0.5),
-                                                              size: 80.0,
+                                                            shape:
+                                                                new CircleBorder(
+                                                              side: BorderSide(
+                                                                color: gold,
+                                                                width: 2.0,
+                                                              ),
                                                             ),
-                                                            Text(
-                                                              "Arrive",
-                                                              style: TextStyle(
-                                                                  fontSize: 20,
-                                                                  color: Colors
-                                                                          .blue[
-                                                                      900]),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        shape: new CircleBorder(
-                                                          side: BorderSide(
-                                                            color: gold,
-                                                            width: 2.0,
+                                                            elevation: 2.0,
+                                                            fillColor:
+                                                                Colors.white,
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(15.0),
                                                           ),
                                                         ),
-                                                        elevation: 2.0,
-                                                        fillColor: Colors.white,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(15.0),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                )));
-                                  },
-                                  childCount: 1,
-                                ),
-                              ),
-                            ],
-                          )));
-                }
-              })),
+                                                      ],
+                                                    )));
+                                      },
+                                      childCount: 1,
+                                    ),
+                                  ),
+                                ],
+                              )));
+                    }
+                  }))),
 
       drawer: email == null
           ? null

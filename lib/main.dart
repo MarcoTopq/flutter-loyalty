@@ -74,6 +74,7 @@ var gold = Color.fromRGBO(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
   firebaseMessaging.requestNotificationPermissions();
   Stream<String> fcmStream = firebaseMessaging.onTokenRefresh;
@@ -397,6 +398,8 @@ class _HomepageState extends State<Homepage>
           showNotification(
             message['notification']['title'],
             message['notification']['body'],
+            message['notification']['data'],
+
           );
           _navigateToItemDetail(message);
         });
@@ -404,7 +407,7 @@ class _HomepageState extends State<Homepage>
       onLaunch: (Map<String, dynamic> message) async {
         setState(() {
           print("onLaunch: $message");
-          showNotification(message['title'], message['body']);
+          showNotification(message['title'], message['body'], message['data']);
           _navigateToItemDetail(message);
         });
       },
@@ -412,7 +415,7 @@ class _HomepageState extends State<Homepage>
         setState(() {
           print("onResume: $message");
           // _navigateToItemDetail(message);
-          showNotification(message['title'], message['body']);
+          showNotification(message['title'], message['body'],message['data']);
           _navigateToItemDetail(message);
         });
       },
@@ -430,7 +433,7 @@ class _HomepageState extends State<Homepage>
     //   Navigator.push(context, item.route);
     // }
     log(message['data']['screen']);
-    if (message['data']['screen'] == 'detaildo') {
+    if (message['data']['screen'] == 'detaildo' ) {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
     }
@@ -442,7 +445,7 @@ class _HomepageState extends State<Homepage>
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
     }
-    if (message['data']['screen'] == 'detailso') {
+    if (message['data']['screen'] == 'detailso' && message['data']['role']== 'agen') {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SalesOrderDetail()));
     }
@@ -451,8 +454,27 @@ class _HomepageState extends State<Homepage>
   }
 
   Future onSelectNotification(String payload) async {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    log("ini notif payload nya ---------- $payload");
+    log(payload.toString());
+        if (payload == 'detaildo' ) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
+    }
+    if (payload == 'detailapprove') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    }
+    if (payload == 'detailaccept') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    }
+    if (payload == 'detailso' ) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SalesOrderDetail()));
+    }
+
+    // Navigator.push(
+    //     context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
     // showDialog(
     //   context: context,
     //   builder: (_) {
@@ -464,11 +486,11 @@ class _HomepageState extends State<Homepage>
     // );
   }
 
-  void showNotification(String title, String body) async {
-    await _demoNotification(title, body);
+  void showNotification(String title, String body, data) async {
+    await _demoNotification(title, body, data);
   }
 
-  Future<void> _demoNotification(String title, String body) async {
+  Future<void> _demoNotification(String title, String body, data) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'channel_ID', 'channel name', 'channel description',
         importance: Importance.max,
@@ -484,7 +506,7 @@ class _HomepageState extends State<Homepage>
       iOS: iOSChannelSpecifics,
     );
     await flutterLocalNotificationsPlugin
-        .show(0, title, body, platformChannelSpecifics, payload: 'test');
+        .show(0, title, body, platformChannelSpecifics, payload: data);
   }
 
   TabController controller;
