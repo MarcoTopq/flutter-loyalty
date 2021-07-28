@@ -148,7 +148,7 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                         .bold)),
                                                       ),
                                                       DataColumn(
-                                                        label: Text('No SH',
+                                                        label: Text('Nama SH',
                                                             style: TextStyle(
                                                                 color: gold,
                                                                 fontSize: 15,
