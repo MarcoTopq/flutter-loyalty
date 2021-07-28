@@ -8,9 +8,11 @@ import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:warnakaltim/src/agenHome.dart';
+import 'package:warnakaltim/src/all_critic.dart';
 import 'package:warnakaltim/src/chartAgen.dart';
 import 'package:warnakaltim/src/chartCustomer.dart';
 import 'package:warnakaltim/src/deliveryHistory.dart';
+import 'package:warnakaltim/src/detailDo.dart';
 import 'package:warnakaltim/src/homeDriver.dart';
 // import 'package:marquee_flutter/marquee_flutter.dart';
 import 'package:warnakaltim/src/login.dart';
@@ -358,64 +360,61 @@ class _HomepageState extends State<Homepage>
         requestSoundPermission: true, defaultPresentAlert: true);
     var initializationSettings = new InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
+    // flutterLocalNotificationsPlugin.initialize(initializationSettings,
+    //     onSelectNotification: onSelectNotification);
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         setState(() {
           print("onMessage: $message");
-          log("onMessage: $message['notification']");
-          print("onMessage:" +message['notification'].toString());
+          log("onMessage: $message");
+          showOverlayNotification((context) {
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              child: SafeArea(
+                child: ListTile(
+                  onTap: () {
+                    OverlaySupportEntry.of(context).dismiss();
+                    _navigateToItemDetail(message);
+                  },
+                  leading: SizedBox.fromSize(
+                      size: const Size(40, 40),
+                      child: ClipOval(
+                          child: Container(
+                        color: Colors.black,
+                      ))),
+                  title: Text(message['notification']['title']),
+                  subtitle: Text(message['notification']['body']),
+                  trailing: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        OverlaySupportEntry.of(context).dismiss();
+                      }),
+                ),
+              ),
+            );
+          }, duration: Duration(milliseconds: 14000));
 
-          // _showItemDialog(message);
-          // Get.snackbar(
-          //   message['title'],
-          //   message['body'],
-          //   snackPosition: SnackPosition.TOP,
-          // );
-          // showOverlayNotification((context) {
-          //   return Card(
-          //     margin: const EdgeInsets.symmetric(horizontal: 4),
-          //     child: SafeArea(
-          //       child: ListTile(
-          //         leading: SizedBox.fromSize(
-          //             size: const Size(40, 40),
-          //             child: ClipOval(
-          //                 child: Container(
-          //               color: Colors.black,
-          //             ))),
-          //         title: Text(message['notification']['title']),
-          //         subtitle: Text(message['notification']['body']),
-          //         trailing: IconButton(
-          //             icon: Icon(Icons.close),
-          //             onPressed: () {
-          //               OverlaySupportEntry.of(context).dismiss();
-          //             }),
-          //       ),
-          //     ),
-          //   );
-          // }, duration: Duration(milliseconds: 4000));
-          showNotification(
-            message['notification']['title'],
-            message['notification']['body'],
-            message['notification']['data'],
-
-          );
-          _navigateToItemDetail(message);
+          // showNotification(message['title'], message['body'], message['data']);
+          // _navigateToItemDetail(message);
         });
       },
       onLaunch: (Map<String, dynamic> message) async {
         setState(() {
           print("onLaunch: $message");
-          showNotification(message['title'], message['body'], message['data']);
+          log("onLaunch: $message");
+          // showNotification(message['title'], message['body'], message['data']);
+
           _navigateToItemDetail(message);
         });
       },
       onResume: (Map<String, dynamic> message) async {
         setState(() {
           print("onResume: $message");
-          // _navigateToItemDetail(message);
-          showNotification(message['title'], message['body'],message['data']);
+          log("onResume: $message");
+          // showNotification(message['title'], message['body'], message['data']);
+          // Navigator.push(context,
+          //     MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
+
           _navigateToItemDetail(message);
         });
       },
@@ -426,39 +425,49 @@ class _HomepageState extends State<Homepage>
   }
 
   void _navigateToItemDetail(Map<String, dynamic> message) {
-    // final Item item = _itemForMessage(message);
-    // Clear away dialogs
-    // Navigator.popUntil(context, (Route<dynamic> route) => route is PageRoute);
-    // if (!item.route.isCurrent) {
-    //   Navigator.push(context, item.route);
-    // }
     log(message['data']['screen']);
-    if (message['data']['screen'] == 'detaildo' ) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
-    }
-    if (message['data']['screen'] == 'detailapprove') {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
-    }
-    if (message['data']['screen'] == 'detailaccept') {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
-    }
-    if (message['data']['screen'] == 'detailso' && message['data']['role']== 'agen') {
+
+    if (message['data']['screen'] == 'detailso' &&
+        message['data']['role'] == 'agen') {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SalesOrderDetail()));
     }
-    // Navigator.push(
-    //     context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    if (message['data']['screen'] == 'detailapprove' &&
+        message['data']['role'] == 'agen') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    }
+    if (message['data']['screen'] == 'listdoso' &&
+        message['data']['role'] == 'agen') {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  DetailDeliveryAgen(id: message['data']['id'])));
+    }
+    if (message['data']['screen'] == 'ratedo' &&
+        message['data']['role'] == 'agen') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Allcritic()));
+    }
+    if (message['data']['screen'] == 'detaildo' &&
+        message['data']['role'] == 'customer') {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
+    }
+
+    // if (message['data']['screen'] == 'detailaccept') {
+    //   Navigator.push(
+    //       context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
+    // }
   }
 
   Future onSelectNotification(String payload) async {
     log("ini notif payload nya ---------- $payload");
     log(payload.toString());
-        if (payload == 'detaildo' ) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
+    if (payload == 'detaildo') {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => DeliveryHistoryDetail()));
     }
     if (payload == 'detailapprove') {
       Navigator.push(
@@ -468,7 +477,7 @@ class _HomepageState extends State<Homepage>
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => DoApproveAgen()));
     }
-    if (payload == 'detailso' ) {
+    if (payload == 'detailso') {
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SalesOrderDetail()));
     }
@@ -486,28 +495,28 @@ class _HomepageState extends State<Homepage>
     // );
   }
 
-  void showNotification(String title, String body, data) async {
-    await _demoNotification(title, body, data);
-  }
+  // void showNotification(String title, String body, String data) async {
+  //   await _demoNotification(title, body, data);
+  // }
 
-  Future<void> _demoNotification(String title, String body, data) async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'channel_ID', 'channel name', 'channel description',
-        importance: Importance.max,
-        playSound: true,
-        // sound: '',
-        showProgress: true,
-        priority: Priority.high,
-        ticker: 'test ticker');
+  // Future<void> _demoNotification(String title, String body, String data) async {
+  //   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+  //       'channel_ID', 'channel name', 'channel description',
+  //       importance: Importance.max,
+  //       playSound: true,
+  //       // sound: '',
+  //       showProgress: true,
+  //       priority: Priority.high,
+  //       ticker: 'test ticker');
 
-    var iOSChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSChannelSpecifics,
-    );
-    await flutterLocalNotificationsPlugin
-        .show(0, title, body, platformChannelSpecifics, payload: data);
-  }
+  //   var iOSChannelSpecifics = IOSNotificationDetails();
+  //   var platformChannelSpecifics = NotificationDetails(
+  //     android: androidPlatformChannelSpecifics,
+  //     iOS: iOSChannelSpecifics,
+  //   );
+  //   await flutterLocalNotificationsPlugin
+  //       .show(0, title, body, platformChannelSpecifics, payload: data);
+  // }
 
   TabController controller;
   int _currentIndex = 0;

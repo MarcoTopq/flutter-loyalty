@@ -14,9 +14,11 @@ import 'package:warnakaltim/src/widget.dart';
 
 class DetailDeliveryAgen extends StatefulWidget {
   final String id;
+  final String customerName;
   DetailDeliveryAgen({
     Key key,
     this.id,
+    this.customerName,
   }) : super(key: key);
   @override
   _DetailDeliveryAgenState createState() => _DetailDeliveryAgenState();
@@ -145,7 +147,15 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                     FontWeight
                                                                         .bold)),
                                                       ),
-
+                                                      DataColumn(
+                                                        label: Text('No SH',
+                                                            style: TextStyle(
+                                                                color: gold,
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold)),
+                                                      ),
                                                       // DataColumn(
                                                       //   label: Text(
                                                       //       'Effective Date End',
@@ -397,7 +407,18 @@ class _DetailDeliveryAgenState extends State<DetailDeliveryAgen>
                                                                 //       )),
                                                                 //   onTap: () {},
                                                                 // ),
-
+                                                                DataCell(
+                                                                  Text(
+                                                                      widget.customerName,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            12,
+                                                                      )),
+                                                                  onTap: () {},
+                                                                ),
                                                                 DataCell(
                                                                   Container(
                                                                       // height: 1000,

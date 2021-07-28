@@ -177,6 +177,17 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                                                           ),
                                                         ],
                                                       ),
+                                                      subtitle: Text(
+                                                        _listSalesOrder
+                                                            .listSalesOrder[
+                                                                index]
+                                                            .customer
+                                                            .toString(),
+                                                        style: new TextStyle(
+                                                          fontSize: 14.0,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
                                                     )),
                                                     Column(
                                                       children: [
@@ -196,11 +207,12 @@ class _SalesOrderDetailState extends State<SalesOrderDetail> {
                                                               Navigator.push(
                                                                   context,
                                                                   MaterialPageRoute(
-                                                                      builder: (context) => DetailDeliveryAgen(
-                                                                          id: _listSalesOrder
-                                                                              .listSalesOrder[index]
-                                                                              .id
-                                                                              .toString())));
+                                                                      builder: (context) =>
+                                                                          DetailDeliveryAgen(
+                                                                            id: _listSalesOrder.listSalesOrder[index].id.toString(),
+                                                                            customerName:
+                                                                                _listSalesOrder.listSalesOrder[index].customer.toString(),
+                                                                          )));
                                                             });
                                                           }),
                                                         ),
